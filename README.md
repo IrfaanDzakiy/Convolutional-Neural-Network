@@ -1,2 +1,2 @@
 # Convolutional-Neural-Network
-IF4074 Pembelajaran Mesin Lanjut
+Tugas 1 IF4074 Pembelajaran Mesin Lanjut
