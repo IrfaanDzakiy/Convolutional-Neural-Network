@@ -76,59 +76,34 @@ class DetectorStage:
 
 class PoolingStage:
 
-    def __init__(self, channel_input, filter_size, padding, stride, mode):
-        self.channel_input = channel_input
+    def __init__(self, filter_size, padding, stride, mode):
         self.filter_size = filter_size
         self.padding = padding
         self.stride = stride
         self.mode = mode
-        self.channel_output = []
 
-    def get_channel_output(self):
-        return self.channel_output
-
-    def pooling(self, channel_idx):
+    def pooling(self, input):
 
         # Initiate all vars
-        matrix = self.channel_input[channel_idx]
-
-        original_mat_size = len(matrix)
+        original_mat_size = len(input)
         filter_size = self.filter_size
         padding = self.padding
         stride = self.stride
         mode = self.mode
 
         # TODO: Prepare the Padding here
-        padded_mat = [[]]
-        if (padding != 0):
-
-            # Add Top and Bottom padding
-            for i in range(padding):
-                pad_row = [0 for j in range(original_mat_size)]
-                matrix.insert(0, pad_row)
-                matrix.insert(len(matrix), pad_row)
-
-            # Add Side Padding
-            for i in range(len(matrix)):
-                curr_row = matrix[i]
-                for j in range(padding):
-                    curr_row.insert(0, 0)
-                    curr_row.insert(len(curr_row), 0)
-
-                matrix[i] = curr_row
-
-            print("Done doing Padding")
+        matrix = pad(input, padding)
 
         # Update matrix size due to padding
         mat_size = len(matrix)
         result_mat_size = featured_maps_size(
             original_mat_size, filter_size, padding, stride)
-        new_mat = [[] for i in range(result_mat_size)]
+        new_mat = np.zeros((result_mat_size, result_mat_size), dtype=int)
 
         print(result_mat_size)
 
         # Calculate Pooling
-        if (mode == 1):  # Max Pooling
+        if (mode == MAX):  # Max Pooling
 
             for row_idx in range(0, mat_size, stride):
                 for col_idx in range(0, mat_size, stride):
@@ -153,9 +128,7 @@ class PoolingStage:
                     new_mat_row_idx = int(row_idx / stride)
                     new_mat_col_idx = int(col_idx / stride)
 
-                    new_mat[new_mat_row_idx].append(max_element)
-
-            return new_mat
+                    new_mat[new_mat_row_idx][new_mat_col_idx] = max_element
 
         else:  # Average Pooling
 
@@ -183,16 +156,16 @@ class PoolingStage:
                     new_mat_row_idx = int(row_idx / stride)
                     new_mat_col_idx = int(col_idx / stride)
 
-                    new_mat[new_mat_row_idx].append(current_avg)
+                    new_mat[new_mat_row_idx][new_mat_col_idx] = current_avg
 
-            return new_mat
+        return new_mat
 
-    def calculate(self):  # Looping pooling based on how many channels
+    def calculate(self, inputs: 'np.ndarray'):  # Looping pooling based on how many channels
+        featureMaps = []
+        for channel_idx in range(len(inputs)):
+            featureMaps.append(self.pooling(inputs[channel_idx]))
 
-        for channel_idx in range(len(self.channel_input)):
-            self.channel_output.append(self.pooling(channel_idx))
-
-        return
+        return np.array(featureMaps)
 
 
 class ConvolutionalStage:
