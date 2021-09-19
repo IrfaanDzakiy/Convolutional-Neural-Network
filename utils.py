@@ -6,6 +6,16 @@ def relu(x):
 def sigmoid(x):
     return (1 / (1 + math.exp(-x)))
 
+def softmax(input):
+    result = []
+    sum_of_exp_z = 0
+    for i in range(len(input)):
+        sum_of_exp_z += math.exp(input[i])
+    
+    for i in range(len(input)):
+        result.append(math.exp(input[i]) / sum_of_exp_z)
+    return result
+    
 def featured_maps_size(matrix_size, filter_size, padding, stride):
 
     return int(((matrix_size - filter_size + (2 * padding)) / stride) + 1)
