@@ -9,11 +9,13 @@ mat_example = [
     [2, 5, 2, 5]
 ]
 
+inputs = np.random.randint(
+    10, size=(2, 5, 5))
+
 
 def testConvo():
     tes = ConvolutionalStage(3, 1, paddingSize=1)
-    inputs = np.random.randint(
-        10, size=(2, 5, 5))
+
     print("INPUTS")
     print(inputs)
     outputs = tes.calculate(inputs)
@@ -33,8 +35,7 @@ def testConvo():
 
 def testDetector():
     tes = DetectorStage(SIGMOID)
-    inputs = np.random.randint(
-        10, size=(2, 3, 3))
+
     print("INPUTS")
     print(inputs)
     outputs = tes.calculate(inputs)
@@ -44,8 +45,6 @@ def testDetector():
 
 def testPooling():
     tes = PoolingStage(2, AVERAGE, stride=2)
-    inputs = np.random.randint(
-        10, size=(1, 5, 5))
 
     print("INPUTS")
     print(inputs)
@@ -54,8 +53,18 @@ def testPooling():
     print(outputs)
 
 
+def testConvoLayer():
+    convoLayer = ConvolutionLayer((3, 2), RELU, MAX, 2)
+
+    print("INPUTS")
+    print(inputs)
+    outputs = convoLayer.calculate(inputs)
+    print("OUTPUTS")
+    print(outputs)
+
+
 def main():
-    testPooling()
+    testConvoLayer()
 
 
 if __name__ == '__main__':

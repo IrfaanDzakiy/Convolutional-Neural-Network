@@ -24,12 +24,20 @@ class ConvolutionLayer:
             filterSize, nFilter, convoPadding, convoStride)
         self.detector_stage = DetectorStage(activation)
         self.pooling_stage = PoolingStage(
-            poolingFilterSize, poolingPadding, poolingStride, poolingMode)
+            poolingFilterSize, poolingMode, poolingPadding, poolingStride)
 
     def calculate(self, inputs: 'np.ndarray'):
         convoOutput = self.convolution_stage.calculate(inputs)
+        print("CONVO LAYER OUTPUT")
+        print(convoOutput)
+
         detectorOutput = self.detector_stage.calculate(convoOutput)
+        print("DETECTOR LAYER OUTPUT")
+        print(detectorOutput)
+
         poolingOutput = self.pooling_stage.calculate(detectorOutput)
+        print("POOLING LAYER OUTPUT")
+        print(poolingOutput)
 
         return poolingOutput
 
@@ -77,7 +85,7 @@ class DetectorStage:
 
 class PoolingStage:
 
-    def __init__(self, filter_size, mode, padding: 'int' = 0, stride: 'int' = 1):
+    def __init__(self, filter_size: 'tuple', mode: 'str', padding: 'int' = 0, stride: 'int' = 1):
         self.filter_size = filter_size
         self.padding = padding
         self.stride = stride
@@ -100,8 +108,6 @@ class PoolingStage:
         result_mat_size = featured_maps_size(
             original_mat_size, filter_size, padding, stride)
         new_mat = np.zeros((result_mat_size, result_mat_size), dtype=float)
-
-        print(result_mat_size)
 
         # Calculate Pooling
         if (mode == MAX):  # Max Pooling
@@ -181,7 +187,7 @@ class ConvolutionalStage:
 
     def generateParams(self):
         return np.random.randint(
-            10, size=(self.nFilter, self.filterSize, self.filterSize))
+            -5, 6, size=(self.nFilter, self.filterSize, self.filterSize))
 
     def generateBias(self):
         return np.full((self.nFilter, 1), 1)
