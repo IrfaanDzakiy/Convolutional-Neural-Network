@@ -7,3 +7,18 @@ mat_example = [
     [6, 3, 5, 3],
     [2, 5, 2, 5]
 ]
+
+
+def main():
+    tes = ConvolutionalStage(3, 2, 2, 1, paddingSize=0)
+    inputs = np.random.randint(
+        10, size=(2, 3, 3))
+    print("INPUTS")
+    print(inputs)
+    outputs = tes.calculate(inputs)
+    print("OUTPUTS")
+    print(outputs)
+
+
+if __name__ == '__main__':
+    main()
