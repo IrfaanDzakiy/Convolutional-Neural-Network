@@ -1,16 +1,28 @@
 from utils import *
+from constant import *
 import numpy as np
 
 
 class ConvolutionLayer:
 
-    def __init__(self, lay_num):
+    def __init__(self,
+                 convoFilterSize: 'tuple',
+                 activation: 'str',
+                 poolingMode: 'str',
+                 poolingFilterSize: 'int',
+                 convoStride: 'int' = 1,
+                 convoPadding: 'int' = 0,
+                 poolingStride: 'int' = 1,
+                 poolingPadding: 'int' = 0):
         # Early initiate detector stage and pooling stage.
         # NOTE that detector stage and pooling stage won't do anything until we execute their calculate function.
         # Both stages are assigned to None first, add them by using add_detector_stage and add_pooling_stage
+        filterSize = convoFilterSize[0]
+        nFilter = convoFilterSize[1]
 
-        self.layer_number = lay_num
-        self.detector_stage = None
+        self.convolution_stage = ConvolutionalStage(
+            filterSize, nFilter, convoPadding, convoStride)
+        self.detector_stage = DetectorStage(activation)
         self.pooling_stage = None
 
     def add_detector_stage(self, channel_input, def_type):
@@ -23,46 +35,43 @@ class ConvolutionLayer:
 
 class DetectorStage:
 
-    def __init__(self, channel_input, det_type):
-        self.channel_input = channel_input
+    def __init__(self, det_type: 'str'):
         self.det_type = det_type
         self.channel_output = []
 
     def get_channel_output(self):
         return self.channel_output
 
-    def detector(self, channel_idx):
+    def detector(self, input: 'np.ndarray'):
         # Type 1 : ReLU
         # Type 2 : Sigmoid
 
-        matrix = self.channel_input[channel_idx]
-
         act_func = self.det_type
-        mat_size = len(matrix)
+        mat_size = len(input)
 
-        new_mat = [[] for i in range(mat_size)]
+        new_mat = np.zeros((mat_size, mat_size), dtype=int)
 
         for i in range(mat_size):
             for j in range(mat_size):
-
                 result = 0
-                x = matrix[i][j]
+                x = input[i][j]
 
-                if (act_func == 1):  # Act function is ReLU
+                if (act_func == RELU):  # Act function is ReLU
                     result = relu(x)
-                else:  # Act function is Sigmoid
+                elif (act_func == SIGMOID):  # Act function is Sigmoid
                     result = sigmoid(x)
 
-                new_mat[i].append(result)
+                new_mat[i][j] = result
 
         return new_mat
 
-    def calculate(self):  # Looping detector based on how many channels
+    def calculate(self, inputs: 'np.ndarray'):  # Looping detector based on how many channels
+        featureMaps = []
 
-        for channel_idx in range(len(self.channel_input)):
-            self.channel_output.append(self.detector(channel_idx))
+        for channel_idx in range(len(inputs)):
+            featureMaps.append(self.detector(inputs[channel_idx]))
 
-        return
+        return np.array(featureMaps)
 
 
 class PoolingStage:
@@ -190,15 +199,13 @@ class ConvolutionalStage:
 
     def __init__(
         self,
-        inputSize: 'int',
-        nInput: 'int',
         filterSize: 'int',
         nFilter: 'int',
-        paddingSize: 'int' = 0,
-        strideSize: 'int' = 1,
+        paddingSize: 'int',
+        strideSize: 'int'
     ) -> None:
-        self.inputSize = inputSize
-        self.nInput = nInput
+        self.inputSize = None
+        self.nInput = None
         self.paddingSize = paddingSize
         self.strideSize = strideSize
         self.filterSize = filterSize
@@ -213,14 +220,9 @@ class ConvolutionalStage:
     def generateBias(self):
         return np.full((self.nFilter, 1), 1)
 
-    def pad(self, inputs: 'np.ndarray'):
-        paddedInputs = []
-        padding_dim = [(self.paddingSize, self.paddingSize),
-                       (self.paddingSize, self.paddingSize)]
-        for i in range(len(inputs)):
-            paddedInputs.append(
-                np.pad(inputs[i], padding_dim, mode='constant'))
-        return np.array(paddedInputs)
+    def setInputAttribute(self, inputs: 'np.ndarray'):
+        self.nInput = len(inputs)
+        self.inputSize = len(inputs[0])
 
     def calculateFeatureMap(self, inputs: 'np.ndarray', filter: 'np.ndarray', bias: 'np.ndarray'):
         featureMapSize = featured_maps_size(
@@ -240,7 +242,8 @@ class ConvolutionalStage:
         return featureMap
 
     def calculate(self, inputs: 'np.ndarray'):
-        paddedInputs = self.pad(inputs)
+        self.setInputAttribute(inputs)
+        paddedInputs = pad(inputs, self.paddingSize)
         featureMaps = []
 
         for iFilter in range(self.nFilter):

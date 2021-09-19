@@ -11,9 +11,9 @@ mat_example = [
 
 
 def main():
-    tes = ConvolutionalStage(3, 2, 2, 1, paddingSize=0)
+    tes = ConvolutionalStage(3, 1, paddingSize=1)
     inputs = np.random.randint(
-        10, size=(2, 3, 3))
+        10, size=(2, 5, 5))
     print("INPUTS")
     print(inputs)
     outputs = tes.calculate(inputs)
