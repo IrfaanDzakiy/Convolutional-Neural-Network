@@ -9,16 +9,17 @@ def relu(x):
 def sigmoid(x):
     return (1 / (1 + math.exp(-x)))
 
+
 def softmax(input):
     result = []
     sum_of_exp_z = 0
     for i in range(len(input)):
         sum_of_exp_z += math.exp(input[i])
-    
+
     for i in range(len(input)):
         result.append(math.exp(input[i]) / sum_of_exp_z)
     return result
-    
+
 
 def featured_maps_size(matrix_size, filter_size, padding, stride):
 
@@ -73,11 +74,15 @@ d = {1: ["conv2d (Conv2D)", "(None, 123, 123, 32)", 2432],
 print_layer(d)
 
 
-def pad(inputs: 'np.ndarray', paddingSize: 'int'):
+def pad3D(inputs: 'np.ndarray', paddingSize: 'int'):
     paddedInputs = []
-    padding_dim = [(paddingSize, paddingSize),
-                   (paddingSize, paddingSize)]
     for i in range(len(inputs)):
         paddedInputs.append(
-            np.pad(inputs[i], padding_dim, mode='constant'))
+            pad2D(inputs[i], paddingSize))
     return np.array(paddedInputs)
+
+
+def pad2D(input: 'np.ndarray', paddingSize: 'int'):
+    padding_dim = [(paddingSize, paddingSize),
+                   (paddingSize, paddingSize)]
+    return np.pad(input, padding_dim, mode='constant')

@@ -23,14 +23,15 @@ class ConvolutionLayer:
         self.convolution_stage = ConvolutionalStage(
             filterSize, nFilter, convoPadding, convoStride)
         self.detector_stage = DetectorStage(activation)
-        self.pooling_stage = None
-
-    def add_detector_stage(self, channel_input, def_type):
-        self.detector_stage = DetectorStage(channel_input, def_type)
-
-    def add_pooling_stage(self, channel_input, filter_size, padding, stride, mode):
         self.pooling_stage = PoolingStage(
-            channel_input, filter_size, padding, stride, mode)
+            poolingFilterSize, poolingPadding, poolingStride, poolingMode)
+
+    def calculate(self, inputs: 'np.ndarray'):
+        convoOutput = self.convolution_stage.calculate(inputs)
+        detectorOutput = self.detector_stage.calculate(convoOutput)
+        poolingOutput = self.pooling_stage.calculate(detectorOutput)
+
+        return poolingOutput
 
 
 class DetectorStage:
@@ -49,7 +50,7 @@ class DetectorStage:
         act_func = self.det_type
         mat_size = len(input)
 
-        new_mat = np.zeros((mat_size, mat_size), dtype=int)
+        new_mat = np.zeros((mat_size, mat_size), dtype=float)
 
         for i in range(mat_size):
             for j in range(mat_size):
@@ -76,7 +77,7 @@ class DetectorStage:
 
 class PoolingStage:
 
-    def __init__(self, filter_size, padding, stride, mode):
+    def __init__(self, filter_size, mode, padding: 'int' = 0, stride: 'int' = 1):
         self.filter_size = filter_size
         self.padding = padding
         self.stride = stride
@@ -91,14 +92,14 @@ class PoolingStage:
         stride = self.stride
         mode = self.mode
 
-        # TODO: Prepare the Padding here
-        matrix = pad(input, padding)
+        # TODO: Prepare the Padding hereW
+        matrix = pad2D(input, padding)
 
         # Update matrix size due to padding
         mat_size = len(matrix)
         result_mat_size = featured_maps_size(
             original_mat_size, filter_size, padding, stride)
-        new_mat = np.zeros((result_mat_size, result_mat_size), dtype=int)
+        new_mat = np.zeros((result_mat_size, result_mat_size), dtype=float)
 
         print(result_mat_size)
 
@@ -119,10 +120,6 @@ class PoolingStage:
                         for j in range(col_idx, col_idx + filter_size):
                             if (max_element < matrix[i][j]):
                                 max_element = matrix[i][j]
-
-                            print(matrix[i][j])
-
-                    print()
 
                     # new idx would be integer
                     new_mat_row_idx = int(row_idx / stride)
@@ -145,10 +142,6 @@ class PoolingStage:
                     for i in range(row_idx, row_idx + filter_size):
                         for j in range(col_idx, col_idx + filter_size):
                             current_avg = current_avg + matrix[i][j]
-
-                            print(matrix[i][j])
-
-                    print()
 
                     current_avg = current_avg / (filter_size * filter_size)
 
@@ -200,7 +193,7 @@ class ConvolutionalStage:
     def calculateFeatureMap(self, inputs: 'np.ndarray', filter: 'np.ndarray', bias: 'np.ndarray'):
         featureMapSize = featured_maps_size(
             self.inputSize, self.filterSize, self.paddingSize, self.strideSize)
-        featureMap = np.zeros((featureMapSize, featureMapSize), dtype=int)
+        featureMap = np.zeros((featureMapSize, featureMapSize), dtype=float)
 
         for iInput in range(self.nInput):
             input = inputs[iInput]
@@ -216,7 +209,7 @@ class ConvolutionalStage:
 
     def calculate(self, inputs: 'np.ndarray'):
         self.setInputAttribute(inputs)
-        paddedInputs = pad(inputs, self.paddingSize)
+        paddedInputs = pad3D(inputs, self.paddingSize)
         featureMaps = []
 
         for iFilter in range(self.nFilter):
