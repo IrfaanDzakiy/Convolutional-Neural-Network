@@ -213,15 +213,6 @@ class ConvolutionalStage:
     def generateBias(self):
         return np.full((self.nFilter, 1), 1)
 
-    def pad(self, inputs: 'np.ndarray'):
-        paddedInputs = []
-        padding_dim = [(self.paddingSize, self.paddingSize),
-                       (self.paddingSize, self.paddingSize)]
-        for i in range(len(inputs)):
-            paddedInputs.append(
-                np.pad(inputs[i], padding_dim, mode='constant'))
-        return np.array(paddedInputs)
-
     def calculateFeatureMap(self, inputs: 'np.ndarray', filter: 'np.ndarray', bias: 'np.ndarray'):
         featureMapSize = featured_maps_size(
             self.inputSize, self.filterSize, self.paddingSize, self.strideSize)
@@ -240,7 +231,7 @@ class ConvolutionalStage:
         return featureMap
 
     def calculate(self, inputs: 'np.ndarray'):
-        paddedInputs = self.pad(inputs)
+        paddedInputs = pad(inputs, self.paddingSize)
         featureMaps = []
 
         for iFilter in range(self.nFilter):
