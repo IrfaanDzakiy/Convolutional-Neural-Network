@@ -10,6 +10,7 @@ class ConvolutionLayer:
                  activation: 'str',
                  poolingMode: 'str',
                  poolingFilterSize: 'int',
+                 inputShape: 'tuple' = None,
                  convoStride: 'int' = 1,
                  convoPadding: 'int' = 0,
                  poolingStride: 'int' = 1,
@@ -25,6 +26,24 @@ class ConvolutionLayer:
         self.detector_stage = DetectorStage(activation)
         self.pooling_stage = PoolingStage(
             poolingFilterSize, poolingMode, poolingPadding, poolingStride)
+        self.inputShape = inputShape
+
+        if (inputShape is not None):
+            self.setInputShape(inputShape)
+
+    def getParamCount(self):
+        return self.convolution_stage.getParamCount()
+
+    def setInputShape(self, shape: 'tuple'):
+        # Here we are propagating the input shape of the layer to each stage
+        self.convolution_stage.setInputShape(shape)
+        convoOutput = self.convolution_stage.getOutputShape()
+
+        # Because Detector Stage is input/output dependant, we dont need to set the input shape
+        self.pooling_stage.setInputShape(convoOutput)
+
+    def getOutputShape(self):
+        return self.pooling_stage.getOutputShape()
 
     def calculate(self, inputs: 'np.ndarray'):
         convoOutput = self.convolution_stage.calculate(inputs)
@@ -90,6 +109,21 @@ class PoolingStage:
         self.padding = padding
         self.stride = stride
         self.mode = mode
+        self.nInput = None
+        self.inputSize = None
+
+    def setInputShape(self, shape: 'tuple'):
+        self.nInput = shape[0]
+        self.inputSize = shape[1]
+
+    def getOutputShape(self):
+        if (self.nInput is None):
+            return (0, 0, 0)
+
+        featureMapSize = featured_maps_size(
+            self.nInput, self.filter_size, self.padding, self.stride)
+
+        return (self.nInput, featureMapSize, featureMapSize)
 
     def pooling(self, input):
 
