@@ -194,6 +194,7 @@ class PoolingStage:
         return new_mat
 
     def calculate(self, inputs: 'np.ndarray'):  # Looping pooling based on how many channels
+        self.setInputShape(inputs.shape)
         featureMaps = []
         for channel_idx in range(len(inputs)):
             featureMaps.append(self.pooling(inputs[channel_idx]))
@@ -237,6 +238,7 @@ class ConvolutionalStage:
     def setInputShape(self, shape: 'tuple'):
         self.nInput = shape[0]
         self.inputSize = shape[1]
+        self.setParams()
 
     def getOutputShape(self):
         featureMapSize = 0
