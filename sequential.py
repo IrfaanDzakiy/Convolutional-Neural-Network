@@ -20,8 +20,6 @@ class Sequential:
         i = 1
         for layer in self.layers:
             output_layer = layer.calculate(inputs)
-            print("OUTPUT LAYER " + str(i))
-            print(output_layer)
             self.outputs.append(output_layer)
 
             inputs = output_layer

@@ -16,8 +16,6 @@ class DenseLayer:
         return "dense"
 
     def generate_weight(self):
-
-        # return [np.random.uniform(100, 1000, len(self.flattened_input)) for i in range(self.unit)]
         return [np.random.randint(10, size=len(self.flattened_input)) for i in range(self.unit)]
 
     def set_activation_function(self, activation_function):
