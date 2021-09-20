@@ -10,34 +10,24 @@ mat_example = [
 ]
 
 inputs = np.random.randint(
-    10, size=(2, 4, 4))
+    10, size=(1, 4, 4))
 
 
 def testConvo():
-    tes = ConvolutionalStage(3, 2, paddingSize=1)
+    tes = ConvolutionalStage(5, 6, paddingSize=1)
 
     print("INPUTS")
     print(inputs)
 
     print("FILTER")
     print(tes.filters)
+    print(tes.getParamCount())
 
     outputs = tes.calculate(inputs)
     print("OUTPUTS")
     print(outputs)
 
-    newInputs = np.random.randint(
-        10, size=(3, 4, 4))
-
-    print("INPUTS")
-    print(newInputs)
-
-    print("FILTER")
-    print(tes.filters)
-
-    outputs = tes.calculate(newInputs)
-    print("OUTPUTS")
-    print(outputs)
+    print(tes.getParamCount())
 
 
 def testDetector():
@@ -71,7 +61,7 @@ def testConvoLayer():
 
 
 def testDenseLayer():
-    denseLayer = Dense_Layer(120)
+    denseLayer = DenseLayer(120)
     print("============== Dense Test ===============")
     act_functions = ["relu", "sigmoid", "softmax"]
     for i in range(len(act_functions)):

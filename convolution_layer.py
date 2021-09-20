@@ -188,6 +188,11 @@ class ConvolutionalStage:
     def setParams(self):
         self.filters = self.generateParams()
 
+    def getParamCount(self):
+        if (self.nInput is None):
+            return 0
+        return self.nFilter * ((self.filterSize * self.filterSize * self.nInput) + 1)
+
     def generateParams(self):
         return np.random.randint(
             -5, 6, size=(self.nFilter, self.nInput, self.filterSize, self.filterSize))
@@ -195,9 +200,17 @@ class ConvolutionalStage:
     def generateBias(self):
         return np.full((self.nFilter, 1), 1)
 
-    def setInputAttribute(self, inputs: 'np.ndarray'):
-        self.nInput = len(inputs)
-        self.inputSize = len(inputs[0])
+    def setInputShape(self, shape: 'tuple'):
+        self.nInput = shape[0]
+        self.inputSize = shape[1]
+
+    def getOutputShape(self):
+        featureMapSize = 0
+        if (self.inputSize is not None):
+            featureMapSize = featured_maps_size(
+                self.inputSize, self.filterSize, self.paddingSize, self.strideSize)
+
+        return (self.nFilter, featureMapSize, featureMapSize)
 
     def calculateFeatureMap(self, inputs: 'np.ndarray', filter: 'np.ndarray', bias: 'np.ndarray'):
         featureMapSize = featured_maps_size(
@@ -219,7 +232,7 @@ class ConvolutionalStage:
 
     def calculate(self, inputs: 'np.ndarray'):
         oldNInput = self.nInput
-        self.setInputAttribute(inputs)
+        self.setInputShape(inputs.shape)
         if (self.filters is None or oldNInput != len(inputs)):
             self.setParams()
 
