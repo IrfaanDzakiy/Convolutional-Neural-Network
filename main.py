@@ -11,7 +11,7 @@ mat_example = [
 ]
 
 inputs = np.random.randint(
-    10, size=(1, 8, 8))
+    256, size=(3, 28, 28))
 
 
 def testConvo():
@@ -73,10 +73,12 @@ def testDenseLayer():
 
 
 def main():
+    print("INPUT")
+    print(inputs)
     convoLayer = ConvolutionLayer((3, 2), RELU, MAX, 2)
-    convoLayer2 = ConvolutionLayer((3, 2), RELU, MAX, 2)
+    convoLayer2 = ConvolutionLayer((2, 4), RELU, MAX, 2)
     denseLayer = DenseLayer(120, "relu")
-    
+
     model = Sequential()
     model.add_inputs(inputs)
     model.add_layer(convoLayer)
@@ -84,6 +86,7 @@ def main():
     model.add_layer(denseLayer)
     model.calculate()
     model.print_summary()
+
 
 if __name__ == '__main__':
     main()

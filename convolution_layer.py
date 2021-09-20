@@ -29,7 +29,7 @@ class ConvolutionLayer:
 
         if (inputShape is not None):
             self.setInputShape(inputShape)
-    
+
     def getName(self):
         return "convo2D"
 
@@ -49,16 +49,8 @@ class ConvolutionLayer:
 
     def calculate(self, inputs: 'np.ndarray'):
         convoOutput = self.convolution_stage.calculate(inputs)
-        print("CONVO LAYER OUTPUT")
-        print(convoOutput)
-
         detectorOutput = self.detector_stage.calculate(convoOutput)
-        print("DETECTOR LAYER OUTPUT")
-        print(detectorOutput)
-
         poolingOutput = self.pooling_stage.calculate(detectorOutput)
-        print("POOLING LAYER OUTPUT")
-        print(poolingOutput)
 
         return poolingOutput
 
@@ -106,7 +98,7 @@ class DetectorStage:
 
 class PoolingStage:
 
-    def __init__(self, filter_size: 'tuple', mode: 'str', padding: 'int' = 0, stride: 'int' = 1):
+    def __init__(self, filter_size: 'int', mode: 'str', padding: 'int' = 0, stride: 'int' = 1):
         self.filter_size = filter_size
         self.padding = padding
         self.stride = stride
@@ -119,11 +111,12 @@ class PoolingStage:
         self.inputSize = shape[1]
 
     def getOutputShape(self):
-        if (self.nInput is None):
+        if (self.nInput is None or self.inputSize is None):
             return (0, 0, 0)
 
         featureMapSize = featured_maps_size(
-            self.nInput, self.filter_size, self.padding, self.stride)
+            self.inputSize, self.filter_size, self.padding, self.stride)
+        print()
 
         return (self.nInput, featureMapSize, featureMapSize)
 
