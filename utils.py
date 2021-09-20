@@ -66,14 +66,6 @@ def print_layer(d):
     print("Non-trainable Params: {}".format(sum_parameter(d)))
     print()
 
-
-d = {1: ["conv2d (Conv2D)", "(None, 123, 123, 32)", 2432],
-     2: ["conv2d_1 (Conv2D)", "(None, 121, 121, 32)", 9248],
-     3: ["max_pooling2d (MaxPooling2D) ", "(None, 40, 40, 32)", 0]}
-
-print_layer(d)
-
-
 def pad3D(inputs: 'np.ndarray', paddingSize: 'int'):
     paddedInputs = []
     for i in range(len(inputs)):
@@ -86,3 +78,24 @@ def pad2D(input: 'np.ndarray', paddingSize: 'int'):
     padding_dim = [(paddingSize, paddingSize),
                    (paddingSize, paddingSize)]
     return np.pad(input, padding_dim, mode='constant')
+
+d = {1: ["conv2d (Conv2D)", "(None, 123, 123, 32)", 2432],
+     2: ["conv2d_1 (Conv2D)", "(None, 121, 121, 32)", 9248],
+     3: ["max_pooling2d (MaxPooling2D) ", "(None, 40, 40, 32)", 0]}
+
+# Test Print Layer
+print_layer(d)
+
+def _extract_mnist_images(image_filepath, num_images):
+    _MNIST_IMAGE_SIZE = 28
+    with open(image_filepath, "rb") as f:
+        f.read(16)  # header
+        buf = f.read(_MNIST_IMAGE_SIZE * _MNIST_IMAGE_SIZE * num_images)
+        data = np.frombuffer(
+            buf,
+            dtype=np.uint8,
+        ).reshape(num_images, _MNIST_IMAGE_SIZE, _MNIST_IMAGE_SIZE, 1)
+        return data
+
+# Test read data
+print(_extract_mnist_images("train-images-idx3-ubyte",1))
