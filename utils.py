@@ -14,10 +14,10 @@ def softmax(input):
     result = []
     sum_of_exp_z = 0
     for i in range(len(input)):
-        sum_of_exp_z += math.exp(input[i])
+        sum_of_exp_z += np.exp(input[i])
 
     for i in range(len(input)):
-        result.append(math.exp(input[i]) / sum_of_exp_z)
+        result.append(np.exp(input[i]) / sum_of_exp_z)
     return result
 
 

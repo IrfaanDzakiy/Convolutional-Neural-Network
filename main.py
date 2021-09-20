@@ -78,8 +78,8 @@ def main():
     convoLayer = ConvolutionLayer((5, 6), RELU, AVERAGE, 2, poolingStride=2)
     convoLayer2 = ConvolutionLayer((5, 16), RELU, AVERAGE, 2, poolingStride=2)
     denseLayer = DenseLayer(120, RELU)
-    denseLayer2 = DenseLayer(84, RELU)
-    denseLayer3 = DenseLayer(10, SOFTMAX)
+    denseLayer2 = DenseLayer(84, SIGMOID)
+    denseLayer3 = DenseLayer(100, SOFTMAX)
 
     model = Sequential()
     model.add_inputs(inputs)
@@ -87,7 +87,7 @@ def main():
     model.add_layer(convoLayer2)
     model.add_layer(denseLayer)
     model.add_layer(denseLayer2)
-    # model.add_layer(denseLayer3)
+    model.add_layer(denseLayer3)
     model.calculate()
     model.print_summary()
 
