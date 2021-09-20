@@ -1,6 +1,7 @@
 from utils import *
 from convolution_layer import *
 from dense_layer import *
+from sequential import *
 
 mat_example = [
     [4, 3, 8, 5],
@@ -72,8 +73,15 @@ def testDenseLayer():
 
 
 def main():
-    testConvo()
-
+    convoLayer = ConvolutionLayer((3, 2), RELU, MAX, 2)
+    denseLayer = DenseLayer(120, "relu")
+    
+    model = Sequential()
+    model.add_inputs(inputs)
+    model.add_layer(convoLayer)
+    model.add_layer(denseLayer)
+    model.calculate()
+    model.print_summary()
 
 if __name__ == '__main__':
     main()

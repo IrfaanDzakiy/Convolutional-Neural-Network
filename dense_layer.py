@@ -13,6 +13,9 @@ class DenseLayer:
         self.inputSize = None
         self.nInput = None
 
+    def getName(self):
+        return "dense"
+        
     def generate_weight(self):
 
         return [np.random.randint(3, size=len(self.flattened_input)) for i in range(self.unit)]
@@ -30,6 +33,9 @@ class DenseLayer:
         self.flattened_input: np.array = self.flattened()
         self.weight: np.array = self.generate_weight()
         self.params = len(self.flattened_input) * self.unit
+        
+    def getOutputShape(self):
+        return (1, self.inputSize, self.inputSize)
 
     def flattened(self):
 

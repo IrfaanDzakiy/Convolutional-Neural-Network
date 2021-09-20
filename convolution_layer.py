@@ -4,7 +4,6 @@ import numpy as np
 
 
 class ConvolutionLayer:
-
     def __init__(self,
                  convoFilterSize: 'tuple',
                  activation: 'str',
@@ -30,6 +29,9 @@ class ConvolutionLayer:
 
         if (inputShape is not None):
             self.setInputShape(inputShape)
+    
+    def getName(self):
+        return "convo2D"
 
     def getParamCount(self):
         return self.convolution_stage.getParamCount()
