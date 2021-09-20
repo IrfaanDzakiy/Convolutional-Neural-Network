@@ -11,15 +11,13 @@ class DenseLayer:
         self.flattened_input = None
         self.weight = None
         self.params = None
-        self.inputSize = None
-        self.nInput = None
 
     def getName(self):
         return "dense"
 
     def generate_weight(self):
 
-        return [np.random.randint(3, size=len(self.flattened_input)) for i in range(self.unit)]
+        return [np.random.random(size=len(self.flattened_input)) for i in range(self.unit)]
 
     def set_activation_function(self, activation_function):
         self.activation_function = activation_function
@@ -28,8 +26,6 @@ class DenseLayer:
         return self.params
 
     def set_input(self, input):
-        self.nInput = len(input)
-        self.inputSize = len(input[0])
         self.input = np.array(input)
         self.flattened_input: np.array = self.flattened()
         self.weight: np.array = self.generate_weight()

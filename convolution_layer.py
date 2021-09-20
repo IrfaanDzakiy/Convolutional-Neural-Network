@@ -225,7 +225,7 @@ class ConvolutionalStage:
 
     def generateParams(self):
         return np.random.randint(
-            -5, 6, size=(self.nFilter, self.nInput, self.filterSize, self.filterSize))
+            1, 6, size=(self.nFilter, self.nInput, self.filterSize, self.filterSize))
 
     def generateBias(self):
         return np.full((self.nFilter, 1), 1)
