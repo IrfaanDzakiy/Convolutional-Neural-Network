@@ -35,8 +35,8 @@ class DenseLayer:
         self.params = len(self.flattened_input) * self.unit
         
     def getOutputShape(self):
-        return (1, self.inputSize, self.inputSize)
-
+        return (1, self.unit)
+        
     def flattened(self):
 
         return np.concatenate(([1], self.input.flatten()))
