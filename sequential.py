@@ -40,13 +40,13 @@ class Sequential:
           if(convo_count==0):
             postfix = " (Convo2D)"
           else:
-            postfix = "_" + convo_count + " (Convo2D)"
+            postfix = "_" + str(convo_count) + " (Convo2D)"
           convo_count+=1
         else:
           if(dense_count==0):
             postfix = " (Convo2D)"
           else: 
-            postfix = "_" + dense_count + " (Dense)"
+            postfix = "_" + str(dense_count) + " (Dense)"
           dense_count+=1
           
         layerTypes = layerType + postfix
