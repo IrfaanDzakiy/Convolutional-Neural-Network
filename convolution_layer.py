@@ -263,10 +263,8 @@ class ConvolutionalStage:
 
     def calculate(self, inputs: 'np.ndarray'):
         oldNInput = self.nInput
-        self.setInputShape(inputs.shape)
-        if (self.filters is None or oldNInput != len(inputs)):
-            self.setParams()
-
+        if (self.nInput is None or self.inputSize is None or oldNInput != len(inputs)):
+            self.setInputShape(inputs.shape)
         paddedInputs = pad3D(inputs, self.paddingSize)
         featureMaps = []
 
