@@ -173,8 +173,8 @@ class ConvolutionalStage:
         self,
         filterSize: 'int',
         nFilter: 'int',
-        paddingSize: 'int',
-        strideSize: 'int'
+        paddingSize: 'int' = 0,
+        strideSize: 'int' = 1
     ) -> None:
         self.inputSize = None
         self.nInput = None
@@ -182,12 +182,15 @@ class ConvolutionalStage:
         self.strideSize = strideSize
         self.filterSize = filterSize
         self.nFilter = nFilter
-        self.filters = self.generateParams()
+        self.filters = None
         self.bias = self.generateBias()
+
+    def setParams(self):
+        self.filters = self.generateParams()
 
     def generateParams(self):
         return np.random.randint(
-            -5, 6, size=(self.nFilter, self.filterSize, self.filterSize))
+            -5, 6, size=(self.nFilter, self.nInput, self.filterSize, self.filterSize))
 
     def generateBias(self):
         return np.full((self.nFilter, 1), 1)
@@ -203,18 +206,23 @@ class ConvolutionalStage:
 
         for iInput in range(self.nInput):
             input = inputs[iInput]
+            inputFilter = filter[iInput]
             for i in range(0, featureMapSize, self.strideSize):
                 for j in range(0, featureMapSize, self.strideSize):
                     inputSubset = input[i:i +
                                         self.filterSize, j:j + self.filterSize]
                     featureMap[i][j] += np.sum(
-                        np.multiply(inputSubset, filter))
+                        np.multiply(inputSubset, inputFilter))
 
         featureMap = featureMap + bias
         return featureMap
 
     def calculate(self, inputs: 'np.ndarray'):
+        oldNInput = self.nInput
         self.setInputAttribute(inputs)
+        if (self.filters is None or oldNInput != len(inputs)):
+            self.setParams()
+
         paddedInputs = pad3D(inputs, self.paddingSize)
         featureMaps = []
 
