@@ -98,4 +98,4 @@ def _extract_mnist_images(image_filepath, num_images):
         return data
 
 # Test read data
-print(_extract_mnist_images("train-images-idx3-ubyte",1))
+# print(_extract_mnist_images("train-images-idx3-ubyte",1))

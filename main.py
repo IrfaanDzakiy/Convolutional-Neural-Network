@@ -62,9 +62,19 @@ def testConvoLayer():
     print("OUTPUTS")
     print(outputs)
 
+def testDenseLayer():
+    denseLayer = Dense_Layer(120)
+    print("============== Dense Test ===============")
+    act_functions = ["relu", "sigmoid", "softmax"]
+    for i in range(len(act_functions)):
+        denseLayer.set_activation_function(act_functions[i])
+        output = denseLayer.calculate(inputs)
+        print(act_functions[i])
+        print(output, " Param: ", denseLayer.get_params())
 
 def main():
-    testConvoLayer()
+    # testConvoLayer()
+    testDenseLayer()
 
 
 if __name__ == '__main__':

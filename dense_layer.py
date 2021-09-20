@@ -2,17 +2,20 @@ from utils import *
 import numpy as np
 
 class Dense_Layer:
-    def __init__(self, input, unit, activation_function=None):
-        self.input = np.array(input)
+    def __init__(self, unit, activation_function=None):
         self.unit = unit
-        self.flattened_input: np.array = np.concatenate(([1], self.input.flatten()))
-        self.weight: np.array = self.generate_weight()
         self.activation_function = activation_function
-        self.params = len(self.flattened_input) * self.unit
+        self.input = None
+        self.flattened_input = None
+        self.weight = None
+        self.params = None
+        self.inputSize = None
+        self.nInput = None
         
     def generate_weight(self):
         
-        return [np.random.randint(10, size=len(self.flattened_input)) for i in range(self.unit)]
+        return [np.random.randint(3, size=len(self.flattened_input)) for i in range(self.unit)]
+        
     
     def set_activation_function(self, activation_function):
         self.activation_function = activation_function
@@ -20,21 +23,29 @@ class Dense_Layer:
     def get_params(self):
         return self.params
     
-    def calculate(self):
+    def set_input(self, input):
+        self.nInput = len(input)
+        self.inputSize = len(input[0])
+        self.input = np.array(input)
+        self.flattened_input: np.array = self.flattened()
+        self.weight: np.array = self.generate_weight()
+        self.params = len(self.flattened_input) * self.unit
+    
+    def flattened(self):
         
-        # print("FLATTENED INPUT")
-        # print(self.flattened_input)
-        # print("WEIGHT")
-        # print(self.weight)
+        return np.concatenate(([1], self.input.flatten()))
+    
+    def calculate(self, inputs):
         
         output = []
         activated_output = []
-        
+        self.set_input(inputs)
+ 
         for i in range(self.unit):
             # Sum Product
             output.append(np.dot(self.flattened_input, self.weight[i]))
-        
-        
+
+
         if self.activation_function.lower() == "relu":
             for i in range(len(output)):
                 activated_output.append(relu(output[i]))
@@ -44,6 +55,7 @@ class Dense_Layer:
         elif self.activation_function.lower() == "softmax":
             for i in range(len(output)):
                 activated_output = softmax(output)
+
                 
         return activated_output
     
