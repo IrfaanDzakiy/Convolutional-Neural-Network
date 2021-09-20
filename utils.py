@@ -47,7 +47,7 @@ def pad2D(input: 'np.ndarray', paddingSize: 'int'):
                    (paddingSize, paddingSize)]
     return np.pad(input, padding_dim, mode='constant')
 
-def _extract_mnist_images(image_filepath, num_images):
+def extract_mnist_images(image_filepath, num_images):
     _MNIST_IMAGE_SIZE = 28
     with open(image_filepath, "rb") as f:
         f.read(16)  # header
@@ -55,5 +55,5 @@ def _extract_mnist_images(image_filepath, num_images):
         data = np.frombuffer(
             buf,
             dtype=np.uint8,
-        ).reshape(num_images, _MNIST_IMAGE_SIZE, _MNIST_IMAGE_SIZE, 1)
+        ).reshape(num_images, 1,_MNIST_IMAGE_SIZE, _MNIST_IMAGE_SIZE)
         return data
