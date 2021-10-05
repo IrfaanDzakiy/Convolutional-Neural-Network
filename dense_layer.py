@@ -16,7 +16,6 @@ class DenseLayer:
         return "dense"
 
     def generate_weight(self):
-
         return [np.random.random(size=len(self.flattened_input)) for i in range(self.unit)]
 
     def set_activation_function(self, activation_function):
@@ -38,10 +37,20 @@ class DenseLayer:
 
         return np.concatenate(([1], self.input.flatten()))
 
+    def normalize(self, arr, t_min=0, t_max=1):
+        norm_arr = []
+        diff = t_max - t_min
+        diff_arr = max(arr) - min(arr)    
+        for i in arr:
+            temp = (((i - min(arr))*diff)/diff_arr) + t_min
+            norm_arr.append(temp)
+        return norm_arr
+
     def calculate(self, inputs):
 
         output = []
         activated_output = []
+        
         self.set_input(inputs)
 
         for i in range(self.unit):
@@ -55,7 +64,8 @@ class DenseLayer:
             for i in range(len(output)):
                 activated_output.append(sigmoid(output[i]))
         elif self.activation_function == SOFTMAX:
+            output = self.normalize(output)
             for i in range(len(output)):
                 activated_output = softmax(output)
-
+        
         return activated_output
