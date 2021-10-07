@@ -16,18 +16,25 @@ inputs = np.random.randint(
 
 
 def main():
-    inputs = extract_mnist_images("train-images-idx3-ubyte", 2)
+    inputs = extract_mnist_images("train-images.idx3-ubyte", 2)
+    inputs = convert_grayscale_to_rgb(inputs) / 255
 
-    for image in inputs:
-        convoLayer = ConvolutionLayer((3, 2), RELU, MAX, 2)
-        denseLayer = DenseLayer(120, "sigmoid")
+    convoLayer = ConvolutionLayer((3, 2), RELU, MAX, 2, 0.01)
+    denseLayer = DenseLayer(10, SOFTMAX)
 
-        model = Sequential()
-        model.add_inputs(image)
-        model.add_layer(convoLayer)
-        model.add_layer(denseLayer)
-        model.calculate()
-        model.print_summary()
+    model = Sequential()
+    model.add_layer(convoLayer)
+    model.add_layer(denseLayer)
+
+    image = inputs[0]
+    model.add_inputs(image)
+    output = model.calculate()
+
+    for o in output:
+        print(o.shape)
+        print(o)
+
+    model.print_summary()
 
 
 if __name__ == '__main__':

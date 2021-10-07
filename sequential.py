@@ -24,6 +24,7 @@ class Sequential:
 
             inputs = output_layer
             i += 1
+        return self.outputs
 
     def print_summary(self):
         convo_count = 0
@@ -45,7 +46,7 @@ class Sequential:
                 convo_count += 1
             else:
                 if(dense_count == 0):
-                    postfix = " (Convo2D)"
+                    postfix = " (Dense)"
                 else:
                     postfix = "_" + str(dense_count) + " (Dense)"
                 dense_count += 1

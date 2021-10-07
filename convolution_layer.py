@@ -9,11 +9,12 @@ class ConvolutionLayer:
                  activation: 'str',
                  poolingMode: 'str',
                  poolingFilterSize: 'int',
+                 learn_rate: 'float',
                  inputShape: 'tuple' = None,
-                 convoStride: 'int' = 1,
-                 convoPadding: 'int' = 0,
-                 poolingStride: 'int' = 1,
-                 poolingPadding: 'int' = 0):
+                 convoStride: 'int' = None,
+                 convoPadding: 'int' = None,
+                 poolingStride: 'int' = None,
+                 poolingPadding: 'int' = None):
         # Early initiate detector stage and pooling stage.
         # NOTE that detector stage and pooling stage won't do anything until we execute their calculate function.
         # Both stages are assigned to None first, add them by using add_detector_stage and add_pooling_stage
@@ -26,6 +27,7 @@ class ConvolutionLayer:
         self.pooling_stage = PoolingStage(
             poolingFilterSize, poolingMode, poolingPadding, poolingStride)
         self.inputShape = inputShape
+        self.learn_rate = learn_rate
 
         if (inputShape is not None):
             self.setInputShape(inputShape)
@@ -53,6 +55,13 @@ class ConvolutionLayer:
         poolingOutput = self.pooling_stage.calculate(detectorOutput)
 
         return poolingOutput
+
+    def backprop(self, dL_dOut: 'np.ndarray'):
+        dL_dDetector = self.pooling_stage.backprop(dL_dOut)
+        dL_dConvo = self.detector_stage.backprop(dL_dDetector)
+        dL_dIn = self.convolution_stage.backprop(dL_dConvo, self.learn_rate)
+
+        return dL_dIn
 
 
 class DetectorStage:
@@ -116,9 +125,9 @@ class DetectorStage:
 
 class PoolingStage:
 
-    def __init__(self, filter_size: 'int', mode: 'str', padding: 'int' = 0, stride: 'int' = None):
+    def __init__(self, filter_size: 'int', mode: 'str', padding: 'int' = None, stride: 'int' = None):
         self.filter_size = filter_size
-        self.padding = padding
+        self.padding = padding if padding != None else 1
         self.stride = stride if stride != None else filter_size
         self.mode = mode
         self.nInput = None
@@ -252,14 +261,14 @@ class ConvolutionalStage:
         self,
         filterSize: 'int',
         nFilter: 'int',
-        paddingSize: 'int' = 0,
-        strideSize: 'int' = 1
+        paddingSize: 'int' = None,
+        strideSize: 'int' = None
     ) -> None:
         self.input: 'np.ndarray' = None
         self.inputSize: 'int' = None
         self.nInput: 'int' = None
-        self.paddingSize = paddingSize
-        self.strideSize = strideSize
+        self.paddingSize = paddingSize if paddingSize != None else 0
+        self.strideSize = strideSize if strideSize != None else 1
         self.filterSize = filterSize
         self.nFilter = nFilter
         self.filters: 'np.ndarray' = None
@@ -309,8 +318,8 @@ class ConvolutionalStage:
         return featureMap
 
     def calculate(self, inputs: 'np.ndarray'):
-        oldNInput = self.nInput
-        if (self.nInput is None or self.inputSize is None or oldNInput != len(inputs)):
+        oldInput = self.input
+        if (self.nInput is None or self.inputSize is None or oldInput.shape != inputs.shape):
             self.setInput(inputs)
         paddedInputs = pad3D(inputs, self.paddingSize)
         featureMaps = []
@@ -322,3 +331,25 @@ class ConvolutionalStage:
             featureMaps.append(featureMap)
 
         return np.array(featureMaps)
+
+    def backprop(self, dL_dOut: 'np.ndarray', learn_rate: 'float'):
+        paddedInput = pad3D(self.input, self.paddingSize)
+        dL_dFilters = np.zeros(self.filters.shape)
+        dL_dB = np.zeros(self.bias.shape)
+        dL_dIn = np.zeros(paddedInput.shape)
+        dL_dOut = np.reshape(
+            dL_dOut, (dL_dOut.shape[0], 1, dL_dOut[1], dL_dOut[2]))
+        dummy_bias = np.zeros(self.bias.shape)
+
+        for iFilter in range(self.nFilter):
+            filter = dL_dOut[iFilter]
+            bias = dummy_bias[iFilter]
+            dL_dFilters[iFilter] = self.convolve(paddedInput, filter, bias)
+            dL_dB[iFilter] = np.sum(filter)
+
+        self.filters -= learn_rate * dL_dFilters
+        self.bias -= learn_rate * dL_dB
+
+        dL_dIn = dL_dIn if (
+            self.paddingSize <= 0) else dL_dIn[:, self.paddingSize:-self.paddingSize, self.paddingSize:-self.paddingSize]
+        return dL_dIn

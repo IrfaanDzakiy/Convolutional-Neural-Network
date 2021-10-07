@@ -15,6 +15,7 @@ Convolutional Neural Network implementation using Python and Numpy library
 
 ```
 pip install numpy
+pip install pillow
 ```
 
 ## How to run
