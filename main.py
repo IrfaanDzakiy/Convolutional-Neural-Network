@@ -16,6 +16,8 @@ inputs = np.random.randint(
 
 def main():
     inputs = extract_mnist_images("train-images-idx3-ubyte", 2)
+
+    print(f"Total images : {len(inputs)}")
     
     for image in inputs:
         convoLayer = ConvolutionLayer((3, 2), RELU, MAX, 2)
@@ -28,5 +30,20 @@ def main():
         model.calculate()
         model.print_summary()
 
+
+def test():
+
+    inputs = [i for i in range(20)]
+    targets = []
+
+    model = Sequential()
+    
+
+    dense_layer = DenseLayer(10, "sigmoid")
+    dense_layer.flattened_input = inputs
+    x = dense_layer.generate_weight()
+    print(len(x))
+
 if __name__ == '__main__':
-    main()
+    # main()
+    test()
