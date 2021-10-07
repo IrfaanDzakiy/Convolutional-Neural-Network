@@ -1,5 +1,6 @@
 import math
 import numpy as np
+from PIL import Image
 
 
 def relu(x):
@@ -55,7 +56,7 @@ def extract_mnist_images(image_filepath, num_images):
         data = np.frombuffer(
             buf,
             dtype=np.uint8,
-        ).reshape(num_images, 1,_MNIST_IMAGE_SIZE, _MNIST_IMAGE_SIZE)
+        ).reshape(num_images,_MNIST_IMAGE_SIZE, _MNIST_IMAGE_SIZE)
         return data
     
     
@@ -82,6 +83,10 @@ def accuracy(test_values, predictions):
     accuracy = (test_values == predictions).sum() / N
     return accuracy
     
+def convert_grayscale_to_rgb(image=None):
+    stacked_img = np.stack((image,)*3, axis=-1)
+    return stacked_img
+    
 # Test k-cross validation , remove this later
 dataset = np.arange(90).reshape((10, 3, 3)) 
 test, train = cross_validation(10, dataset, 2)
@@ -92,3 +97,17 @@ print(train)
 true_values = np.array([[1, 0, 0, 1, 1, 1, 1, 1, 1, 0]])
 predictions = np.array([[1, 0, 0, 1, 1, 1, 1, 1, 0, 1]])
 print(accuracy(true_values,predictions))
+
+
+arr = extract_mnist_images("train-images-idx3-ubyte", 2)
+print(arr)
+print(arr.shape)
+
+stacked_arr = convert_grayscale_to_rgb(arr)
+print(stacked_arr.shape)
+print(stacked_arr[0].shape)
+
+# Test convert grayscale to RGB
+for i in stacked_arr:
+    img = Image.fromarray(i, 'RGB')
+    img.show()
