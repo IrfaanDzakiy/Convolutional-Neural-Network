@@ -60,9 +60,17 @@ class DetectorStage:
     def __init__(self, det_type: 'str'):
         self.det_type = det_type
         self.channel_output = []
+        self.input: 'np.ndarray' = None
+        self.nInput: 'int' = None
+        self.inputSize: 'int' = None
 
     def get_channel_output(self):
         return self.channel_output
+
+    def setInput(self, inputs: 'np.ndarray'):
+        self.input = inputs
+        self.nInput = inputs.shape[0]
+        self.inputSize = inputs.shape[1]
 
     def detector(self, input: 'np.ndarray'):
         # Type 1 : ReLU
@@ -88,6 +96,7 @@ class DetectorStage:
         return new_mat
 
     def calculate(self, inputs: 'np.ndarray'):  # Looping detector based on how many channels
+        self.setInput(inputs)
         featureMaps = []
 
         for channel_idx in range(len(inputs)):
@@ -95,20 +104,31 @@ class DetectorStage:
 
         return np.array(featureMaps)
 
+    def backprop(self, dL_dOut: 'np.ndarray'):
+        inputs = self.input.copy()
+        if (self.det_type == RELU):
+            dOut_dIn = dRelu(inputs)
+        elif (self.det_type == SIGMOID):
+            dOut_dIn = dSigmoid(inputs)
+
+        return dL_dOut * dOut_dIn
+
 
 class PoolingStage:
 
-    def __init__(self, filter_size: 'int', mode: 'str', padding: 'int' = 0, stride: 'int' = 1):
+    def __init__(self, filter_size: 'int', mode: 'str', padding: 'int' = 0, stride: 'int' = None):
         self.filter_size = filter_size
         self.padding = padding
-        self.stride = stride
+        self.stride = stride if stride != None else filter_size
         self.mode = mode
         self.nInput = None
         self.inputSize = None
+        self.input: 'np.ndarray' = None
 
-    def setInputShape(self, shape: 'tuple'):
-        self.nInput = shape[0]
-        self.inputSize = shape[1]
+    def setInput(self, inputs: 'np.ndarray'):
+        self.input = inputs
+        self.nInput = inputs.shape[0]
+        self.inputSize = inputs.shape[1]
 
     def getOutputShape(self):
         if (self.nInput is None or self.inputSize is None):
@@ -189,12 +209,36 @@ class PoolingStage:
         return new_mat
 
     def calculate(self, inputs: 'np.ndarray'):  # Looping pooling based on how many channels
-        self.setInputShape(inputs.shape)
+        self.setInput(inputs)
         featureMaps = []
         for channel_idx in range(len(inputs)):
             featureMaps.append(self.pooling(inputs[channel_idx]))
 
         return np.array(featureMaps)
+
+    def backprop(self, dL_dOut: 'np.ndarray'):
+        (n_output, size_output, _) = self.getOutputShape()
+        paddedInput = pad3D(self.input, self.padding)
+        dL_dInput = np.zeros(paddedInput.shape)
+
+        for i_dOut in range(n_output):
+            for i in range(0, size_output, self.stride):
+                for j in range(0, size_output, self.stride):
+                    if (self.mode == MAX):
+                        rec_field = paddedInput[i_dOut, i:i +
+                                                self.filter_size, j:j + self.filter_size]
+                        (x_max, y_max) = np.argwhere(
+                            rec_field == dL_dOut[i_dOut, i, j])[0]
+                        dL_dInput[i_dOut, i + x_max, j +
+                                  y_max] = dL_dOut[i_dOut, i, j]
+                    elif (self.mode == AVERAGE):
+                        dL_dInput[i_dOut, i:i + self.filter_size, j:j +
+                                  self.filter_size] += dL_dOut[i_dOut, i, j]/(self.filter_size**2)
+
+        if (self.padding > 0):
+            dL_dInput = dL_dInput[:, self.padding:-
+                                  self.padding, self.padding:-self.padding]
+        return dL_dInput
 
 
 class ConvolutionalStage:
@@ -206,17 +250,15 @@ class ConvolutionalStage:
         paddingSize: 'int' = 0,
         strideSize: 'int' = 1
     ) -> None:
-        self.inputSize = None
-        self.nInput = None
+        self.input: 'np.ndarray' = None
+        self.inputSize: 'int' = None
+        self.nInput: 'int' = None
         self.paddingSize = paddingSize
         self.strideSize = strideSize
         self.filterSize = filterSize
         self.nFilter = nFilter
-        self.filters = None
-        self.bias = self.generateBias()
-
-    def setParams(self):
-        self.filters = self.generateParams()
+        self.filters: 'np.ndarray' = None
+        self.bias: 'np.ndarray' = self.generateBias()
 
     def getParamCount(self):
         if (self.nInput is None):
@@ -224,16 +266,16 @@ class ConvolutionalStage:
         return self.nFilter * ((self.filterSize * self.filterSize * self.nInput) + 1)
 
     def generateParams(self):
-        return np.random.randint(
-            1, 6, size=(self.nFilter, self.nInput, self.filterSize, self.filterSize))
+        return np.random.randn(self.nFilter, self.nInput, self.filterSize, self.filterSize)
 
     def generateBias(self):
         return np.full((self.nFilter, 1), 1)
 
-    def setInputShape(self, shape: 'tuple'):
-        self.nInput = shape[0]
-        self.inputSize = shape[1]
-        self.setParams()
+    def setInput(self, inputs: 'np.ndarray'):
+        self.input = inputs
+        self.nInput = inputs.shape[0]
+        self.inputSize = inputs.shape[1]
+        self.filters = self.generateParams()
 
     def getOutputShape(self):
         featureMapSize = 0
@@ -243,7 +285,7 @@ class ConvolutionalStage:
 
         return (self.nFilter, featureMapSize, featureMapSize)
 
-    def calculateFeatureMap(self, inputs: 'np.ndarray', filter: 'np.ndarray', bias: 'np.ndarray'):
+    def convolve(self, inputs: 'np.ndarray', filter: 'np.ndarray', bias: 'np.ndarray'):
         featureMapSize = featured_maps_size(
             self.inputSize, self.filterSize, self.paddingSize, self.strideSize)
         featureMap = np.zeros((featureMapSize, featureMapSize), dtype=float)
@@ -264,14 +306,14 @@ class ConvolutionalStage:
     def calculate(self, inputs: 'np.ndarray'):
         oldNInput = self.nInput
         if (self.nInput is None or self.inputSize is None or oldNInput != len(inputs)):
-            self.setInputShape(inputs.shape)
+            self.setInput(inputs)
         paddedInputs = pad3D(inputs, self.paddingSize)
         featureMaps = []
 
         for iFilter in range(self.nFilter):
             filter = self.filters[iFilter]
             bias = self.bias[iFilter]
-            featureMap = self.calculateFeatureMap(paddedInputs, filter, bias)
+            featureMap = self.convolve(paddedInputs, filter, bias)
             featureMaps.append(featureMap)
 
         return np.array(featureMaps)
