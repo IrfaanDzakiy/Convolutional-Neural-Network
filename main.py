@@ -14,6 +14,7 @@ mat_example = [
 inputs = np.random.randint(
     256, size=(1, 32, 32))
 
+
 def main():
     inputs = extract_mnist_images("train-images-idx3-ubyte", 2)
 
