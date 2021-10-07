@@ -96,7 +96,7 @@ def accuracy(test_values, predictions):
 
 
 def convert_grayscale_to_rgb(image=None):
-    stacked_img = np.stack((image,)*3, axis=-1)
+    stacked_img = np.stack((image,)*3, axis=1)
     return stacked_img
 
 
@@ -122,5 +122,8 @@ if __name__ == '__main__':
 
     # Test convert grayscale to RGB
     for i in stacked_arr:
-        img = Image.fromarray(i, 'RGB')
+        reshaped_i = np.reshape(i, (28, 28, 3))
+        print(reshaped_i.shape)
+        print(reshaped_i[0][0])
+        img = Image.fromarray(reshaped_i, 'RGB')
         img.show()
