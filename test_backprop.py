@@ -1,17 +1,26 @@
 import numpy as np
-from convolution_layer import PoolingStage
+from convolution_layer import PoolingStage, DetectorStage
 from constant import *
 
-input: 'np.ndarray' = np.arange(32)
-input = input.reshape((2, 4, 4))
+input: 'np.ndarray' = np.random.randn(2, 4, 4)
 
 print(input)
 
-pooling = PoolingStage(3, AVERAGE, stride=1)
-output = pooling.calculate(input)
+pooling = PoolingStage(2, MAX)
+detector = DetectorStage(SIGMOID)
 
-print(output)
+print("Fowardprop Layer 1")
+output1 = detector.calculate(input)
+print(output1, end='\n\n')
 
-backprop = pooling.backprop(output)
+print("Fowardprop Layer 2")
+output2 = pooling.calculate(output1)
+print(output2, end='\n\n')
 
-print(backprop)
+print("Backprop Layer 2")
+backprop2 = pooling.backprop(output2)
+print(backprop2, end='\n\n')
+
+print("Backprop Layer 1")
+backprop1 = detector.backprop(backprop2)
+print(backprop1, end='\n\n')

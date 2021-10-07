@@ -12,7 +12,7 @@ def dRelu(x: 'np.ndarray'):
 
 
 def dSigmoid(x: 'np.ndarray'):
-    sigmoid_x = sigmoid(x)
+    sigmoid_x = 1 / (1 + np.exp(-x))
     return sigmoid_x * (1 - sigmoid_x)
 
 
