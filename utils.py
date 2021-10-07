@@ -100,27 +100,27 @@ def convert_grayscale_to_rgb(image=None):
     return stacked_img
 
 
-# Test k-cross validation , remove this later
-dataset = np.arange(90).reshape((10, 3, 3))
-test, train = cross_validation(10, dataset, 2)
-print(test)
-print(train)
+if __name__ == '__main__':
+    # Test k-cross validation , remove this later
+    dataset = np.arange(90).reshape((10, 3, 3))
+    test, train = cross_validation(10, dataset, 2)
+    print(test)
+    print(train)
 
-# Test accuracy , remove this later
-true_values = np.array([[1, 0, 0, 1, 1, 1, 1, 1, 1, 0]])
-predictions = np.array([[1, 0, 0, 1, 1, 1, 1, 1, 0, 1]])
-print(accuracy(true_values, predictions))
+    # Test accuracy , remove this later
+    true_values = np.array([[1, 0, 0, 1, 1, 1, 1, 1, 1, 0]])
+    predictions = np.array([[1, 0, 0, 1, 1, 1, 1, 1, 0, 1]])
+    print(accuracy(true_values, predictions))
 
+    arr = extract_mnist_images("train-images-idx3-ubyte", 2)
+    print(arr)
+    print(arr.shape)
 
-arr = extract_mnist_images("train-images-idx3-ubyte", 2)
-print(arr)
-print(arr.shape)
+    stacked_arr = convert_grayscale_to_rgb(arr)
+    print(stacked_arr.shape)
+    print(stacked_arr[0].shape)
 
-stacked_arr = convert_grayscale_to_rgb(arr)
-print(stacked_arr.shape)
-print(stacked_arr[0].shape)
-
-# Test convert grayscale to RGB
-for i in stacked_arr:
-    img = Image.fromarray(i, 'RGB')
-    img.show()
+    # Test convert grayscale to RGB
+    for i in stacked_arr:
+        img = Image.fromarray(i, 'RGB')
+        img.show()

@@ -14,9 +14,10 @@ mat_example = [
 inputs = np.random.randint(
     256, size=(1, 32, 32))
 
+
 def main():
     inputs = extract_mnist_images("train-images-idx3-ubyte", 2)
-    
+
     for image in inputs:
         convoLayer = ConvolutionLayer((3, 2), RELU, MAX, 2)
         denseLayer = DenseLayer(120, "sigmoid")
@@ -27,6 +28,7 @@ def main():
         model.add_layer(denseLayer)
         model.calculate()
         model.print_summary()
+
 
 if __name__ == '__main__':
     main()

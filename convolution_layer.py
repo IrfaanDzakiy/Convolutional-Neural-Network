@@ -222,18 +222,23 @@ class PoolingStage:
         dL_dInput = np.zeros(paddedInput.shape)
 
         for i_dOut in range(n_output):
-            for i in range(0, size_output, self.stride):
-                for j in range(0, size_output, self.stride):
+            for i in range(0, size_output):
+                for j in range(0, size_output):
+                    rec_i_start = i * self.stride
+                    rec_i_end = rec_i_start + self.filter_size
+                    rec_j_start = j * self.stride
+                    rec_j_end = rec_j_start + self.filter_size
+
                     if (self.mode == MAX):
-                        rec_field = paddedInput[i_dOut, i:i +
-                                                self.filter_size, j:j + self.filter_size]
+                        rec_field = paddedInput[i_dOut,
+                                                rec_i_start:rec_i_end, rec_j_start:rec_j_end]
                         (x_max, y_max) = np.argwhere(
                             rec_field == dL_dOut[i_dOut, i, j])[0]
-                        dL_dInput[i_dOut, i + x_max, j +
+                        dL_dInput[i_dOut, rec_i_start + x_max, rec_j_start +
                                   y_max] = dL_dOut[i_dOut, i, j]
                     elif (self.mode == AVERAGE):
-                        dL_dInput[i_dOut, i:i + self.filter_size, j:j +
-                                  self.filter_size] += dL_dOut[i_dOut, i, j]/(self.filter_size**2)
+                        dL_dInput[i_dOut, rec_i_start:rec_i_end,
+                                  rec_j_start:rec_j_end] += dL_dOut[i_dOut, i, j]/(self.filter_size**2)
 
         if (self.padding > 0):
             dL_dInput = dL_dInput[:, self.padding:-
