@@ -57,3 +57,38 @@ def extract_mnist_images(image_filepath, num_images):
             dtype=np.uint8,
         ).reshape(num_images, 1,_MNIST_IMAGE_SIZE, _MNIST_IMAGE_SIZE)
         return data
+    
+    
+def cross_validation(k, dataset, seed = 1, random = 1):
+    
+    # Shuffle the dataset
+    np.random.seed(seed)
+    for i in range(random):  
+        np.random.shuffle(dataset)
+    
+    # Split into k groups
+    k_group = np.array_split(dataset, k)
+    
+    test_data = k_group[0]
+    train_data = k_group[1]
+    for i in range(2,len(k_group)):
+        train_data = np.concatenate((train_data, k_group[i]), axis=0)
+    
+    return test_data, train_data  
+   
+
+def accuracy(test_values, predictions):
+    N = test_values.shape[1]
+    accuracy = (test_values == predictions).sum() / N
+    return accuracy
+    
+# Test k-cross validation , remove this later
+dataset = np.arange(90).reshape((10, 3, 3)) 
+test, train = cross_validation(10, dataset, 2)
+print(test)
+print(train)
+
+# Test accuracy , remove this later
+true_values = np.array([[1, 0, 0, 1, 1, 1, 1, 1, 1, 0]])
+predictions = np.array([[1, 0, 0, 1, 1, 1, 1, 1, 0, 1]])
+print(accuracy(true_values,predictions))
