@@ -57,4 +57,6 @@ if __name__ == '__main__':
     y_predictions = np.array(y_predictions)
     print("Y predictions :", y_predictions)
     print("Y validations :", y_validation)
-    print("Accuracy :", accuracy(y_predictions, y_validation))
+    print("Accuracy :", accuracy(y_predictions,y_validation))
+    
+    create_csv(y_predictions)
