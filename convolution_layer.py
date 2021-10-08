@@ -29,12 +29,7 @@ class ConvolutionLayer:
         self.learn_rate = learn_rate
         self.output_shape = None
         self.params = None
-        # if (inputShape is not None):
-        #     self.setInputShape(inputShape)
-
-        self.targets = None
-        self.output = []
-        self.error_unit = []
+        self.output: 'np.ndarray' = None
 
     def set_output_shape(self, output_shape):
         self.output_shape = output_shape
@@ -62,7 +57,10 @@ class ConvolutionLayer:
 
     def set_kernel(self, kernel):
         self.convolution_stage.set_kernel(kernel)
-    
+
+    def getParams(self):
+        return self.convolution_stage.filters
+
     def getParamCount(self):
         return self.params if self.params != None else self.convolution_stage.getParamCount()
 
@@ -77,14 +75,19 @@ class ConvolutionLayer:
         detectorOutput = self.detector_stage.calculate(convoOutput)
         poolingOutput = self.pooling_stage.calculate(detectorOutput)
 
+        self.output = poolingOutput
         return poolingOutput
 
-    def backprop(self, dL_dOut: 'np.ndarray'):
+    def backprop(self, dL_dOut: 'np.ndarray', learn_rate: 'float'):
         dL_dDetector = self.pooling_stage.backprop(dL_dOut)
         dL_dConvo = self.detector_stage.backprop(dL_dDetector)
-        dL_dIn = self.convolution_stage.backprop(dL_dConvo, self.learn_rate)
+        dL_dIn = self.convolution_stage.backprop(dL_dConvo, learn_rate)
 
         return dL_dIn
+
+    def updateParams(self):
+        self.convolution_stage.updateParams()
+        self.convolution_stage.resetDelta()
 
 
 class DetectorStage:
@@ -150,7 +153,7 @@ class PoolingStage:
 
     def __init__(self, filter_size: 'int', mode: 'str', padding: 'int' = None, stride: 'int' = None):
         self.filter_size = filter_size
-        self.padding = padding if padding != None else 1
+        self.padding = padding if padding != None else 0
         self.stride = stride if stride != None else filter_size
         self.mode = mode
         self.nInput = None
@@ -264,8 +267,12 @@ class PoolingStage:
                     if (self.mode == MAX):
                         rec_field = paddedInput[i_dOut,
                                                 rec_i_start:rec_i_end, rec_j_start:rec_j_end]
-                        (x_max, y_max) = np.argwhere(
-                            rec_field == dL_dOut[i_dOut, i, j])[0]
+                        max_indices = np.argwhere(
+                            rec_field == dL_dOut[i_dOut, i, j])
+                        if (len(max_indices) == 0):
+                            (x_max, y_max) = (0, 0)
+                        else:
+                            (x_max, y_max) = max_indices[0]
                         dL_dInput[i_dOut, rec_i_start + x_max, rec_j_start +
                                   y_max] = dL_dOut[i_dOut, i, j]
                     elif (self.mode == AVERAGE):
@@ -296,6 +303,8 @@ class ConvolutionalStage:
         self.nFilter = nFilter
         self.filters: 'np.ndarray' = None
         self.bias: 'np.ndarray' = self.generateBias()
+        self.dL_dFilter: 'np.ndarray' = None
+        self.dL_dBias: 'np.ndarray' = None
 
     def getParamCount(self):
         if (self.nInput is None):
@@ -305,17 +314,27 @@ class ConvolutionalStage:
     def set_kernel(self, kernel):
         self.filters = kernel
     
+    def resetParams(self):
+        self.filters = self.generateParams()
+
+    def resetDelta(self):
+        self.dL_dFilter = np.zeros(self.filters.shape)
+        self.dL_dBias = np.zeros(self.bias.shape)
+
+    def updateParams(self):
+        self.filters += self.dL_dFilter
+        self.bias += self.dL_dBias
+
     def generateParams(self):
         return np.random.randn(self.nFilter, self.nInput, self.filterSize, self.filterSize)
 
     def generateBias(self):
-        return np.full((self.nFilter, 1), 1)
+        return np.full((self.nFilter, 1), 1, dtype='float64')
 
     def setInput(self, inputs: 'np.ndarray'):
         self.input = inputs
         self.nInput = inputs.shape[0]
         self.inputSize = inputs.shape[1]
-        self.filters = self.generateParams()
 
     def getOutputShape(self):
         featureMapSize = 0
@@ -326,17 +345,20 @@ class ConvolutionalStage:
         return (self.nFilter, featureMapSize, featureMapSize)
 
     def convolve(self, inputs: 'np.ndarray', filter: 'np.ndarray', bias: 'np.ndarray'):
+        inputSize = inputs.shape[1]
+        filterSize = filter.shape[1]
         featureMapSize = featured_maps_size(
-            self.inputSize, self.filterSize, self.paddingSize, self.strideSize)
+            inputSize, filterSize, self.paddingSize, self.strideSize)
         featureMap = np.zeros((featureMapSize, featureMapSize), dtype=float)
 
         for iInput in range(self.nInput):
             input = inputs[iInput]
             inputFilter = filter[iInput]
+
             for i in range(0, featureMapSize, self.strideSize):
                 for j in range(0, featureMapSize, self.strideSize):
                     inputSubset = input[i:i +
-                                        self.filterSize, j:j + self.filterSize]
+                                        filterSize, j:j + filterSize]
                     featureMap[i][j] += np.sum(
                         np.multiply(inputSubset, inputFilter))
 
@@ -344,9 +366,12 @@ class ConvolutionalStage:
         return featureMap
 
     def calculate(self, inputs: 'np.ndarray'):
-        oldInput = self.input
-        if (self.nInput is None or self.inputSize is None or oldInput.shape != inputs.shape):
-            self.setInput(inputs)
+        isResetParam = self.input is None or self.input.shape != inputs.shape
+        self.setInput(inputs)
+        if (isResetParam):
+            self.resetParams()
+            self.resetDelta()
+
         paddedInputs = pad3D(inputs, self.paddingSize)
         featureMaps = []
 
@@ -363,8 +388,7 @@ class ConvolutionalStage:
         dL_dFilters = np.zeros(self.filters.shape)
         dL_dB = np.zeros(self.bias.shape)
         dL_dIn = np.zeros(paddedInput.shape)
-        dL_dOut = np.reshape(
-            dL_dOut, (dL_dOut.shape[0], 1, dL_dOut[1], dL_dOut[2]))
+        dL_dOut = np.stack((dL_dOut,)*1, axis=1)
         dummy_bias = np.zeros(self.bias.shape)
 
         for iFilter in range(self.nFilter):
@@ -373,8 +397,8 @@ class ConvolutionalStage:
             dL_dFilters[iFilter] = self.convolve(paddedInput, filter, bias)
             dL_dB[iFilter] = np.sum(filter)
 
-        self.filters -= learn_rate * dL_dFilters
-        self.bias -= learn_rate * dL_dB
+        self.dL_dFilter -= dL_dFilters * learn_rate
+        self.dL_dBias -= dL_dB * learn_rate
 
         dL_dIn = dL_dIn if (
             self.paddingSize <= 0) else dL_dIn[:, self.paddingSize:-self.paddingSize, self.paddingSize:-self.paddingSize]

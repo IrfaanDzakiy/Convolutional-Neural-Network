@@ -1,6 +1,7 @@
 import math
 import numpy as np
 from PIL import Image
+import csv
 
 
 def relu(x):
@@ -45,7 +46,7 @@ def print_matrix(matrix):
         print("")
 
 
-def pad3D(inputs: 'np.ndarray', paddingSize: 'int'):
+def pad3D(inputs: 'np.ndarray', paddingSize: 'int') -> 'np.ndarray':
     paddedInputs = []
     for i in range(len(inputs)):
         paddedInputs.append(
@@ -119,6 +120,10 @@ def convert_grayscale_to_rgb(image=None):
     return stacked_img
 
 
+def convert_to_grayscale(image):
+    return np.stack((image,)*1, axis=1)
+
+
 if __name__ == '__main__':
     # Test k-cross validation , remove this later
     dataset = np.arange(90).reshape((10, 3, 3))
@@ -146,3 +151,14 @@ if __name__ == '__main__':
         print(reshaped_i[0][0])
         img = Image.fromarray(reshaped_i, 'RGB')
         img.show()
+
+def create_csv(predictions):
+    fieldnames = ['id', 'labels']
+
+    with open('predictions.csv', "w") as csvfile:
+        csvwriter = csv.writer(csvfile)
+        csvwriter.writerow(fieldnames)
+
+        for i in range(len(predictions)):
+            curr_row = [i+1, predictions[i]]
+            csvwriter.writerow(curr_row)
