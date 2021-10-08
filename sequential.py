@@ -1,6 +1,6 @@
 from convolution_layer import *
 from dense_layer import *
-
+import pickle
 
 class Sequential:
     def __init__(self):
@@ -24,6 +24,7 @@ class Sequential:
         inputs = self.inputs
         i = 1
         for layer in self.layers:
+            print("layer ke", i)
             output_layer = layer.calculate(inputs)
             self.outputs.append(output_layer)
             layer.output.append(output_layer)
@@ -31,7 +32,58 @@ class Sequential:
             inputs = output_layer
             i += 1
         return self.outputs
+    
+    def save_model(self, filename):
+        i = 1
+        file = open(filename, 'wb')
+        
+        data_dict = {}
+        for layer in self.layers:
+            data_dict["layer" + str(i)] = layer.get_data()
+            i += 1
+            
+        pickle.dump(data_dict, file)
+        file.close()
+        print("MODEL SAVED")
 
+    def load_model(self, filename):
+        
+        file = open(filename, 'rb')
+
+        data = pickle.load(file)
+
+        file.close()
+        i = 0
+        for key, layer in data.items():
+            type = layer['type']
+
+            if type == "DENSE": 
+                self.add_layer(DenseLayer(layer['unit'], layer['activation_function']))
+                self.layers[i].set_weight(layer['weight'])
+                self.layers[i].set_params(layer['params'])
+                
+                
+            elif type == "CONVOLUTION": 
+                self.add_layer(
+                    ConvolutionLayer(
+                    layer['convolution_filter_size'], 
+                    layer['detector_activation_function'],
+                    layer['pooling_mode'],
+                    layer['pooling_filter_size'],
+                    layer['convolution_stride'],
+                    layer['convolution_padding'],
+                    layer['pooling_stride'],
+                    layer['pooling_padding']
+                ))
+                self.layers[i].set_kernel(layer["convolution_kernel"])
+                self.layers[i].set_output_shape(layer["output_shape"])
+                self.layers[i].set_params(layer["params"])
+                
+                
+            i += 1
+        
+        print("MODEL LOADED")
+         
     def print_summary(self):
         convo_count = 0
         dense_count = 0
@@ -41,7 +93,6 @@ class Sequential:
         print("=======================================================================")
 
         sum_parameter = 0
-
         for layer in self.layers:
             layerType = layer.getName()
             if(layerType == "convo2D"):

@@ -12,19 +12,38 @@ class DenseLayer:
         self.flattened_input = None
         self.weight = None
         self.params = None
-
         # Belows are the attribute for backprop
         self.learning_rate = None
         self.net_output = None
-        self.output = None
+        self.output= None
         self.delta_weight = None
         self.error_unit = [0 for i in range(self.unit)]
 
+    def get_data(self):
+        data = {
+            "type": self.layer_type,
+            "weight": self.weight,
+            "activation_function": self.activation_function,
+            "unit": self.unit,
+            "params": self.params,
+            "output": self.output,
+            "input_shape": self.input.shape,
+            "params": self.params
+            # "output_shape": self.output.shape,
+            # "learning_rate": self.learning_rate, 
+        }
+        return data
+    
+    def set_params(self, params):
+        self.params = params
+        
+    def set_weight(self, weight):
+        self.weight = weight
+        
     def getName(self):
         return "dense"
 
     def generate_weight(self):
-        print("Flatten input at generate weight = ", self.flattened_input.shape)
         return [np.random.random(size=len(self.flattened_input)) for i in range(self.unit)]
 
     def set_activation_function(self, activation_function):
@@ -59,13 +78,12 @@ class DenseLayer:
         return norm_arr
 
     def calculate(self, inputs):
-
         output = []
         activated_output = []
 
         # Set input here, including randomize weight
         self.set_input(inputs)
-
+        
         for i in range(self.unit):
             # Sum Product
             # print("Flatten input : ", self.flattened_input)
@@ -88,14 +106,15 @@ class DenseLayer:
             for i in range(len(output)):
                 activated_output.append(sigmoid(output[i]))
         elif self.activation_function == SOFTMAX:
-            output = self.normalize(output)
+            # output = self.normalize(output)
             for i in range(len(output)):
                 activated_output = softmax(output)
 
         # Insert activated output to class
         self.net_output = output
-        self.output = activated_output
         # print("OUTPUT Array = ", len(activated_output))
+        self.output = activated_output
+        
         return activated_output
 
     # Belows are the elements for backward propagation
