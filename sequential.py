@@ -20,7 +20,6 @@ class Sequential:
         curr_layer = self.layers[curr_total_layers-1]
         curr_layer.targets = self.targets
 
-
     def calculate(self):
         inputs = self.inputs
         i = 1
@@ -79,7 +78,6 @@ class Sequential:
         print("Non-trainable Params: {}".format(non_trainable_parameter))
         print()
 
-
     def forward_prop(self, data):
         inputs = data
         for layer in self.layers:
@@ -88,12 +86,10 @@ class Sequential:
 
             # Masukin hasil aktivasi ke output dari suatu layer
             layer.output = output_layer
-            
+
             # Output as new input
             inputs = output_layer
 
-        return
-    
     # Backprop Dense Elements
     def refresh_error_unit(self):
         for layer_idx in range(len(self.layers)):
@@ -111,7 +107,7 @@ class Sequential:
 
             curr_data_input = data[data_idx]
             curr_target = targets[data_idx]
-            
+
             # First, we do the forward propagation
             self.add_inputs(curr_data_input)
             self.forward_prop(curr_data_input)
@@ -138,24 +134,26 @@ class Sequential:
                 # Get prev layer
                 if (i == 0):
                     # Create dummy layer
-                    dummy_layer = DenseLayer(len(self.inputs),"RELU")
+                    dummy_layer = DenseLayer(len(self.inputs), "RELU")
                     dummy_layer.output = self.inputs
                     prev_layer = dummy_layer
-                else :
+                else:
                     prev_layer = self.layers[i-1]
 
                 # Check is output to determine next layer
                 is_output = False
                 if (i == total_layers - 1):
                     is_output = True
-                
+
                 # Train neurons per layer
                 learning_result = None
                 if (is_output):
-                    learning_result = layer.train_neurons(rate, prev_layer, None, curr_target, is_output, is_end_of_batch)
-                else :
+                    learning_result = layer.train_neurons(
+                        rate, prev_layer, None, curr_target, is_output, is_end_of_batch)
+                else:
                     next_layer = self.layers[i+1]
-                    learning_result = layer.train_neurons(rate, prev_layer, next_layer, curr_target, is_output, is_end_of_batch)    
+                    learning_result = layer.train_neurons(
+                        rate, prev_layer, next_layer, curr_target, is_output, is_end_of_batch)
 
                 # Update weight if end of batch
                 if (is_end_of_batch):
@@ -166,21 +164,19 @@ class Sequential:
                     print("Should update delta weight here")
                     self.layers[i].delta_weight = learning_result
 
-
             # We reset error units in every layers each tuple
             self.refresh_error_unit()
 
             # Increment data_batch_idx
             if (is_end_of_batch):
                 data_batch_idx = 0
-            else :
+            else:
                 data_batch_idx += 1
 
             print(f"DATA KE-{data_idx+1} TELAH DILEWATI")
 
         # Check the weight here
 
-    
     def print_layers_weight(self):
         for layer in self.layers:
             print(layer.weight)

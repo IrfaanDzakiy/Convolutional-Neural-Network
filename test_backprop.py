@@ -8,7 +8,7 @@ if __name__ == '__main__':
     n_data = 10
 
     x_train = extract_mnist_images("train-images.idx3-ubyte", n_data)
-    x_train = convert_grayscale_to_rgb(x_train)
+    x_train = convert_grayscale_to_rgb(x_train) / 255
     y_train = extract_mnist_labels("train-labels.idx1-ubyte", n_data)
     y_train = one_hot_encoder(y_train)
 

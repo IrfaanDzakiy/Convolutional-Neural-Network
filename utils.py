@@ -45,7 +45,7 @@ def print_matrix(matrix):
         print("")
 
 
-def pad3D(inputs: 'np.ndarray', paddingSize: 'int'):
+def pad3D(inputs: 'np.ndarray', paddingSize: 'int') -> 'np.ndarray':
     paddedInputs = []
     for i in range(len(inputs)):
         paddedInputs.append(
