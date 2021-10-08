@@ -119,6 +119,10 @@ def convert_grayscale_to_rgb(image=None):
     return stacked_img
 
 
+def convert_to_grayscale(image):
+    return np.stack((image,)*1, axis=1)
+
+
 if __name__ == '__main__':
     # Test k-cross validation , remove this later
     dataset = np.arange(90).reshape((10, 3, 3))
