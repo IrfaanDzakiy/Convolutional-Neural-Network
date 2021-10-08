@@ -35,6 +35,9 @@ class ConvolutionLayer:
     def getName(self):
         return "convo2D"
 
+    def getParams(self):
+        return self.convolution_stage.filters
+
     def getParamCount(self):
         return self.convolution_stage.getParamCount()
 
@@ -231,7 +234,6 @@ class PoolingStage:
         return np.array(featureMaps)
 
     def backprop(self, dL_dOut: 'np.ndarray'):
-        print(dL_dOut)
         (n_output, size_output, _) = self.getOutputShape()
         paddedInput = pad3D(self.input, self.padding)
         dL_dInput = np.zeros(paddedInput.shape)
@@ -306,7 +308,7 @@ class ConvolutionalStage:
         return np.random.randn(self.nFilter, self.nInput, self.filterSize, self.filterSize)
 
     def generateBias(self):
-        return np.full((self.nFilter, 1), 1)
+        return np.full((self.nFilter, 1), 1, dtype='float64')
 
     def setInput(self, inputs: 'np.ndarray'):
         self.input = inputs
@@ -343,9 +345,9 @@ class ConvolutionalStage:
         return featureMap
 
     def calculate(self, inputs: 'np.ndarray'):
-        oldInput = None if self.input == None else self.input.copy()
+        isResetParam = self.input is None or self.input.shape != inputs.shape
         self.setInput(inputs)
-        if (oldInput == None or oldInput.shape != inputs.shape):
+        if (isResetParam):
             self.resetParams()
             self.resetDelta()
 

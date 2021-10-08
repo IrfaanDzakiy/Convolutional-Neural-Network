@@ -23,12 +23,12 @@ if __name__ == '__main__':
 
     model = Sequential()
 
-    convo_layer = ConvolutionLayer((5, 4), RELU, MAX, 2)
+    convo_layer = ConvolutionLayer((5, 4), SIGMOID, MAX, 2)
     dense_layer1 = DenseLayer(10, SOFTMAX)
 
     model.add_layer(convo_layer)
     model.add_layer(dense_layer1)
 
     batch_size = 5
-    rate = 0.01
+    rate = 0.3
     model.train_model(x_train, y_train, batch_size, rate)

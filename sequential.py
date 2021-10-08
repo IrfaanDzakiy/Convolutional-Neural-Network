@@ -173,4 +173,4 @@ class Sequential:
                 print(layer.weight)
             else:
                 print("CONVO LAYER KERNELS")
-                print(layer.filters)
+                print(layer.getParams())

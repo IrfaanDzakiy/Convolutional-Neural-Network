@@ -102,7 +102,6 @@ class DenseLayer:
 
     # Output Backprop
     def D_Ed_Wji_output(self, i, j, target):
-        print(i, j, target, np.argmax(target))
         curr_input = 0
         if (i == 0):
             curr_input = 1
@@ -111,9 +110,11 @@ class DenseLayer:
 
         if (self.activation_function == SOFTMAX):
             if (j != np.argmax(target)):
+                self.error_unit[j] = self.output[j]
                 return self.output[j] * curr_input
 
             else:
+                self.error_unit[j] = (-1) * (1 - self.output[j])
                 return (-1) * (1 - self.output[j]) * curr_input
 
         else:
@@ -204,7 +205,7 @@ class DenseLayer:
         if (i == 0):
             curr_input = 1
         else:
-            curr_input = self.input[i-1]
+            curr_input = self.flattened_input[i-1]
 
         return curr_input
 
@@ -244,19 +245,9 @@ class DenseLayer:
         else:
             self.delta_weight = new_delta_weight
 
-        dE_dOut = np.array(self.error_unit)
+        dE_dOut = np.array(self.error_unit, dtype='float64')
         dOut_dIn = np.array(self.weight)
         dE_dIn = dE_dOut @ dOut_dIn
         dE_dIn = np.reshape(dE_dIn[1:], self.input.shape)
-
-        print(dE_dIn)
-
-        # print(np_error.shape)  # (unit, 1)
-        # print(np_weight.shape)  # (unit, )
-        # print(result.shape)
-
-        # print(np_error)
-        # print(np_weight)
-        # print(result)
 
         return dE_dIn
