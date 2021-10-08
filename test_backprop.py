@@ -1,26 +1,20 @@
 import numpy as np
-from convolution_layer import PoolingStage, DetectorStage
+from PIL import Image
+from convolution_layer import ConvolutionLayer
 from constant import *
+from utils import *
 
-input: 'np.ndarray' = np.random.randn(2, 4, 4)
+if __name__ == '__main__':
+    n_data = 10
 
-print(input)
+    x_train = extract_mnist_images("train-images.idx3-ubyte", n_data)
+    x_train = convert_grayscale_to_rgb(x_train)
+    y_train = extract_mnist_labels("train-labels.idx1-ubyte", n_data)
+    y_train = one_hot_encoder(y_train)
 
-pooling = PoolingStage(2, MAX)
-detector = DetectorStage(SIGMOID)
+    print("Image")
+    print(x_train.shape)
 
-print("Fowardprop Layer 1")
-output1 = detector.calculate(input)
-print(output1, end='\n\n')
-
-print("Fowardprop Layer 2")
-output2 = pooling.calculate(output1)
-print(output2, end='\n\n')
-
-print("Backprop Layer 2")
-backprop2 = pooling.backprop(output2)
-print(backprop2, end='\n\n')
-
-print("Backprop Layer 1")
-backprop1 = detector.backprop(backprop2)
-print(backprop1, end='\n\n')
+    print("Label")
+    print(y_train.shape)
+    print(y_train)
