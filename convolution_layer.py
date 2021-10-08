@@ -9,7 +9,6 @@ class ConvolutionLayer:
                  activation: 'str',
                  poolingMode: 'str',
                  poolingFilterSize: 'int',
-                 learn_rate: 'float',
                  convoStride: 'int' = None,
                  convoPadding: 'int' = None,
                  poolingStride: 'int' = None,
@@ -26,14 +25,13 @@ class ConvolutionLayer:
         self.detector_stage = DetectorStage(activation)
         self.pooling_stage = PoolingStage(
             poolingFilterSize, poolingMode, poolingPadding, poolingStride)
-        self.learn_rate = learn_rate
         self.output_shape = None
         self.params = None
         self.output: 'np.ndarray' = None
 
     def set_output_shape(self, output_shape):
         self.output_shape = output_shape
-        
+
     def getName(self):
         return "convo2D"
 
@@ -313,7 +311,7 @@ class ConvolutionalStage:
 
     def set_kernel(self, kernel):
         self.filters = kernel
-    
+
     def resetParams(self):
         self.filters = self.generateParams()
 
