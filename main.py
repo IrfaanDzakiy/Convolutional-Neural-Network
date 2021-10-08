@@ -53,8 +53,15 @@ def test_backprop_dense():
 
     batch_size = 3
     rate = 0.5
-    model.train_model(data, targets, batch_size, rate)
+    epoch = 5
+    model.train_model(data, targets, epoch, batch_size, rate)
+
+
+def csv_convert():
+    predictions = [1, 0, 1, 0, 1, 0]
+    create_csv(predictions)
 
 if __name__ == '__main__':
     # main()
-    test_backprop_dense()
+    # test_backprop_dense()
+    csv_convert()
