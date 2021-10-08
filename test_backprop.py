@@ -7,7 +7,7 @@ from constant import *
 from utils import *
 
 if __name__ == '__main__':
-    n_data = 1000
+    n_data = 60000
 
     # x_train = extract_mnist_images("train-images.idx3-ubyte", n_data)
     # x_train = convert_to_grayscale(x_train) / 255
@@ -16,6 +16,11 @@ if __name__ == '__main__':
     x = extract_mnist_images("train-images.idx3-ubyte", n_data)
     x = convert_to_grayscale(x) / 255
     y = extract_mnist_labels("train-labels.idx1-ubyte", n_data)
+    
+    x_test = extract_mnist_images("t10k-images.idx3-ubyte", 1000)
+    x_test = convert_to_grayscale(x_test) / 255
+    y_test = extract_mnist_images("t10k-labels.idx1-ubyte", 1000)
+    y_test = one_hot_encoder(y_test)
 
     x_validation, x_train = cross_validation(10, x)
     y_validation, y_train = cross_validation(10, y)
@@ -50,13 +55,13 @@ if __name__ == '__main__':
 
     y_predictions = []
 
-    for image in x_validation:
+    for image in x_test:
         output = np.argmax(model.forward_prop(image))
         y_predictions.append(output)
 
     y_predictions = np.array(y_predictions)
     print("Y predictions :", y_predictions)
-    print("Y validations :", y_validation)
-    print("Accuracy :", accuracy(y_predictions,y_validation))
+    print("Y validations :", y_test)
+    print("Accuracy :", accuracy(y_predictions,y_test))
     
     create_csv(y_predictions)
