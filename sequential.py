@@ -140,6 +140,7 @@ class Sequential:
 
             # Output as new input
             inputs = output_layer
+        return inputs
 
     def update_convo_params(self):
         for layer in self.layers:

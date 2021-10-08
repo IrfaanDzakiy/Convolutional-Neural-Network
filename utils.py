@@ -94,9 +94,9 @@ def one_hot_encoder(input: 'np.ndarray'):
 def cross_validation(k, dataset, seed=1, random=1):
 
     # Shuffle the dataset
-    np.random.seed(seed)
-    for i in range(random):
-        np.random.shuffle(dataset)
+    # np.random.seed(seed)
+    # for i in range(random):
+    #     np.random.shuffle(dataset)
 
     # Split into k groups
     k_group = np.array_split(dataset, k)
@@ -110,7 +110,7 @@ def cross_validation(k, dataset, seed=1, random=1):
 
 
 def accuracy(test_values, predictions):
-    N = test_values.shape[1]
+    N = test_values.shape[0]
     accuracy = (test_values == predictions).sum() / N
     return accuracy
 
