@@ -32,6 +32,10 @@ class ConvolutionLayer:
         if (inputShape is not None):
             self.setInputShape(inputShape)
 
+        self.targets = None
+        self.output = []
+        self.error_unit = []
+
     def getName(self):
         return "convo2D"
 
