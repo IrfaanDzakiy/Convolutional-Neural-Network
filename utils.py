@@ -21,6 +21,10 @@ def sigmoid(x):
     return (1 / (1 + math.exp(-x)))
 
 
+def tanh(x):
+    return (math.exp(x) - math.exp(-x))/(math.exp(x) + math.exp(-x))
+
+
 def softmax(input):
     result = []
     sum_of_exp_z = 0
@@ -162,3 +166,32 @@ def create_csv(predictions):
         for i in range(len(predictions)):
             curr_row = [i+1, predictions[i]]
             csvwriter.writerow(curr_row)
+
+
+def mmult(A, B):
+    a_row = A.shape[0]
+    a_col = A.shape[1]
+    b_row = B.shape[0]
+    b_col = B.shape[1]
+
+    if (a_col != b_row):
+        print("Cannot multiply. A_col != B_row")
+        return
+
+    # Result shape is a_row x b_col
+    result = [[0 for i in range(b_col)] for j in range(a_row)]
+
+
+    for row_idx_a in range(a_row):
+        
+        for col_idx_res in range(b_col):
+            total = 0
+            for col_idx_a in range(a_col):
+                # Col idx a move along with row idx b
+                total += A[row_idx_a][col_idx_a] * B[col_idx_a][col_idx_res]
+            
+            result[row_idx_a][col_idx_res] = total
+
+
+    res_in_np_array = np.array(result)
+    return res_in_np_array
