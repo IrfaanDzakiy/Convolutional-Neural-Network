@@ -14,6 +14,7 @@ class LSTMLayer:
 
         # Input is based on timestep T, Xt
         self.input = None
+        self.output = None
 
         # U weights (from prev layer / input to LSTM)
         self.u_i = None
@@ -44,17 +45,17 @@ class LSTMLayer:
         self.output_gate = None
 
     def generate_weight_U(self):
-        return [np.random.random(size=len(self.input)) for i in range(self.num_units)]
+        return np.array([np.random.random(size=len(self.input)) for i in range(self.num_units)])
 
     def generate_weight_W(self):
-        return [np.random.random(size=(self.num_units)) for i in range(self.num_units)]
+        return np.array([np.random.random(size=(self.num_units)) for i in range(self.num_units)])
 
     def generate_bias_B(self):
         rand_res = random.random()
-        return [rand_res for i in range(self.num_units)]
+        return np.array([rand_res for i in range(self.num_units)]).reshape(self.num_units, 1)
 
     def generate_Ht_prev(self):
-        return [0 for i in range(self.num_units)]
+        return np.array([0 for i in range(self.num_units)]).reshape(self.num_units, 1)
 
     def set_input(self, input):
         # Self input is flattened without bias
@@ -108,7 +109,7 @@ class LSTMLayer:
         if (self.ct_prev is None):
             self.ct_prev: np.array = np.array(self.generate_Ht_prev())
 
-        self.params = len(self.flattened_input) * self.unit
+        # self.params = len(self.flattened_input) * self.unit
 
 
     def calculate(self, inputs):
@@ -117,10 +118,14 @@ class LSTMLayer:
 
         # Inputs would be input for all timesteps
 
+        last_output = None
+
         for curr_input in inputs:
             
-            Xt = curr_input
+            Xt = np.array(curr_input).reshape(len(curr_input),1)
             self.set_input(Xt)
+
+            print(Xt.shape)
 
             # TODO : Calculate Forget Gate
             UfXt = mmult(self.u_f, Xt)
@@ -179,4 +184,11 @@ class LSTMLayer:
             # Update prev h_t
             self.ht_prev = h_t
 
+            # Update last output
+            last_output = o_t
+
+        print(f"Output : \n{last_output}")
+        self.output = last_output
+        return last_output
+        
 

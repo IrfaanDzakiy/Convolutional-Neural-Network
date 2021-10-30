@@ -2,6 +2,7 @@ from utils import *
 from convolution_layer import *
 from dense_layer import *
 from sequential import *
+from lstm import *
 from PIL import Image
 import numpy as np
 
@@ -61,7 +62,34 @@ def csv_convert():
     predictions = [1, 0, 1, 0, 1, 0]
     create_csv(predictions)
 
+
+def lstm_test():
+    inputs = np.array([[1, 2], [0.5, 3]])
+
+    lstm = LSTMLayer(1)
+    lstm.calculate(inputs)
+
+
+def lstm_seq_test():
+    inputs = np.array([[1, 2], [0.5, 3]])
+
+    model = Sequential()
+
+    dense_output = DenseLayer(5, SOFTMAX)
+    lstm = LSTMLayer(3)
+
+    model.add_layer(lstm)
+    model.add_layer(dense_output)
+
+    output = model.calculate()
+
+    print(f"Model Output : \n {output}")
+
+
 if __name__ == '__main__':
     # main()
     # test_backprop_dense()
-    csv_convert()
+    # csv_convert()
+
+    lstm_test()
+    # lstm_seq_test()
