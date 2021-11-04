@@ -7,7 +7,7 @@ class LSTMLayer:
 
     # Input Matrix is U, timestep matrix is W
 
-    def __init__(self, num_units):
+    def __init__(self, num_units, return_sequence=False):
         super().__init__()
         self.layer_unit = "LSTM"
         self.num_units = num_units
@@ -44,6 +44,22 @@ class LSTMLayer:
         self.input_gate = None
         self.output_gate = None
 
+        self.return_sequence = return_sequence
+
+    def getName(self):
+        return 'lstm'
+
+    def getOutputShape(self):
+        if (self.return_sequence):
+            return (self.num_units, len(self.input))
+        else:
+            return (1, len(self.input))
+
+    def getParamCount(self):
+        n = self.num_units
+        m = len(self.input)
+        return (m + n + 1) * 4 * n
+
     def generate_weight_U(self):
         return np.array([np.random.random(size=len(self.input)) for i in range(self.num_units)])
 
@@ -61,7 +77,6 @@ class LSTMLayer:
         # Self input is flattened without bias
         self.input = np.array(input).flatten()
 
-
         # Set all U here
         if (self.u_i is None):
             self.u_i: np.array = np.array(self.generate_weight_U())
@@ -78,7 +93,7 @@ class LSTMLayer:
         # Set all W here
         if (self.w_i is None):
             self.w_i: np.array = np.array(self.generate_weight_W())
-        
+
         if (self.w_f is None):
             self.w_f: np.array = np.array(self.generate_weight_W())
 
@@ -111,7 +126,6 @@ class LSTMLayer:
 
         # self.params = len(self.flattened_input) * self.unit
 
-
     def calculate(self, inputs):
         output = []
         activated_output = []
@@ -121,8 +135,8 @@ class LSTMLayer:
         last_output = None
 
         for curr_input in inputs:
-            
-            Xt = np.array(curr_input).reshape(len(curr_input),1)
+
+            Xt = np.array(curr_input).reshape(len(curr_input), 1)
             self.set_input(Xt)
 
             print(Xt.shape)
@@ -135,7 +149,7 @@ class LSTMLayer:
             # Activate Here (Sigmoid)
             for i in range(len(total)):
                 total[i] = sigmoid(total[i])
-            
+
             f_t = total
 
             # TODO : Calculate Input Gate
@@ -146,9 +160,8 @@ class LSTMLayer:
             # Activate Here (Sigmoid)
             for i in range(len(total)):
                 total[i] = sigmoid(total[i])
-            
-            i_t = total
 
+            i_t = total
 
             # TODO : Calculate Cell State
             UcXt = mmult(self.u_c, Xt)
@@ -178,7 +191,7 @@ class LSTMLayer:
             tanh_c_t = C_t
             for i in range(len(tanh_c_t)):
                 tanh_c_t[i] = tanh(tanh_c_t[i])
-            
+
             h_t = o_t * tanh_c_t
 
             # Update prev h_t
@@ -190,5 +203,3 @@ class LSTMLayer:
         print(f"Output : \n{last_output}")
         self.output = last_output
         return last_output
-        
-

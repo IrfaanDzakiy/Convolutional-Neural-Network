@@ -2,6 +2,7 @@ from convolution_layer import *
 from dense_layer import *
 import pickle
 
+
 class Sequential:
     def __init__(self):
         self.layers = []
@@ -20,6 +21,7 @@ class Sequential:
         curr_layer = self.layers[curr_total_layers-1]
         curr_layer.targets = self.targets
 
+    # DEPRECATED
     def calculate(self):
         inputs = self.inputs
         i = 1
@@ -32,22 +34,22 @@ class Sequential:
             inputs = output_layer
             i += 1
         return self.outputs
-    
+
     def save_model(self, filename):
         i = 1
         file = open(filename, 'wb')
-        
+
         data_dict = {}
         for layer in self.layers:
             data_dict["layer" + str(i)] = layer.get_data()
             i += 1
-            
+
         pickle.dump(data_dict, file)
         file.close()
         print("MODEL SAVED")
 
     def load_model(self, filename):
-        
+
         file = open(filename, 'rb')
 
         data = pickle.load(file)
@@ -57,36 +59,36 @@ class Sequential:
         for key, layer in data.items():
             type = layer['type']
 
-            if type == "DENSE": 
-                self.add_layer(DenseLayer(layer['unit'], layer['activation_function']))
+            if type == "DENSE":
+                self.add_layer(DenseLayer(
+                    layer['unit'], layer['activation_function']))
                 self.layers[i].set_weight(layer['weight'])
                 self.layers[i].set_params(layer['params'])
-                
-                
-            elif type == "CONVOLUTION": 
+
+            elif type == "CONVOLUTION":
                 self.add_layer(
                     ConvolutionLayer(
-                    layer['convolution_filter_size'], 
-                    layer['detector_activation_function'],
-                    layer['pooling_mode'],
-                    layer['pooling_filter_size'],
-                    layer['convolution_stride'],
-                    layer['convolution_padding'],
-                    layer['pooling_stride'],
-                    layer['pooling_padding']
-                ))
+                        layer['convolution_filter_size'],
+                        layer['detector_activation_function'],
+                        layer['pooling_mode'],
+                        layer['pooling_filter_size'],
+                        layer['convolution_stride'],
+                        layer['convolution_padding'],
+                        layer['pooling_stride'],
+                        layer['pooling_padding']
+                    ))
                 self.layers[i].set_kernel(layer["convolution_kernel"])
                 self.layers[i].set_output_shape(layer["output_shape"])
                 self.layers[i].set_params(layer["params"])
-                
-                
+
             i += 1
-        
+
         print("MODEL LOADED")
-         
+
     def print_summary(self):
         convo_count = 0
         dense_count = 0
+        lstm_count = 0
         print("———————————————————————————————————————————————————————————————————————")
         print("{:<30} {:<30} {:<10}".format(
             'Layer (type) ', 'Output Shape', 'Param #'))
@@ -101,19 +103,22 @@ class Sequential:
                 else:
                     postfix = "_" + str(convo_count) + " (Convo2D)"
                 convo_count += 1
-            else:
+            elif (layerType == "dense"):
                 if(dense_count == 0):
                     postfix = " (Dense)"
                 else:
                     postfix = "_" + str(dense_count) + " (Dense)"
                 dense_count += 1
+            elif (layerType == 'lstm'):
+                if (lstm_count == 0):
+                    postfix = " (LSTM)"
+                else:
+                    postfix = "_" + str(lstm_count) + " (LSTM)"
 
             layerTypes = layerType + postfix
             shape = layer.getOutputShape()
             weight = layer.getParamCount()
             sum_parameter += weight
-            print("layer ke", i)
-            print(layer.getName())
             i += 1
             print("{:<30} {:<30} {:<10}".format(
                 layerTypes, str(shape), weight))
@@ -202,7 +207,8 @@ class Sequential:
                             learning_result = layer.train_neurons(
                                 rate, next_layer, curr_target, is_output, is_end_of_batch)
                         elif (layer.getName() == 'convo2D'):
-                            learning_result = layer.backprop(learning_result, rate)
+                            learning_result = layer.backprop(
+                                learning_result, rate)
 
                 # We reset error units in every layers each tuple
                 self.refresh_error_unit()
