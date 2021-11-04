@@ -91,7 +91,7 @@ class Sequential:
         print("{:<30} {:<30} {:<10}".format(
             'Layer (type) ', 'Output Shape', 'Param #'))
         print("=======================================================================")
-
+        i = 1
         sum_parameter = 0
         for layer in self.layers:
             layerType = layer.getName()
@@ -112,6 +112,9 @@ class Sequential:
             shape = layer.getOutputShape()
             weight = layer.getParamCount()
             sum_parameter += weight
+            print("layer ke", i)
+            print(layer.getName())
+            i += 1
             print("{:<30} {:<30} {:<10}".format(
                 layerTypes, str(shape), weight))
             if (layer != self.layers[len(self.layers)-1]):
@@ -209,7 +212,7 @@ class Sequential:
                     self.update_convo_params()
                     data_batch_idx = 0
                     print("BATCH BERAKHIR, WEIGHT ADALAH")
-                    self.print_layers_weight()
+                    # self.print_layers_weight()
                 else:
                     data_batch_idx += 1
 

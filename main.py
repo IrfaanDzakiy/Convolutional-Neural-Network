@@ -39,12 +39,69 @@ def main():
 
     model.print_summary()
 
+def minMaxScaler(x, xMin, xMax):
+    
+    xVal = None
+    
+    if isinstance(x, str):
+        xVal = float(x.replace(',',''))
+    else:
+        xVal = x
+    
+    return (xVal - xMin) / (xMax - xMin)
+
+def getMinMaxVal(array, row, col):
+    min = float('inf')
+    max = float('-inf')
+
+    value = None
+
+    if isinstance(array[0][col-1], str):
+        # new_array = []
+        for i in range(row):
+            value = float((array[i][col-1]).replace(',',''))
+            
+            if value < min:
+                min = value
+            if value > max:
+                max = value
+        
+    else:
+        for i in range(row):
+            
+            value = array[row][col-1]
+            
+            if value < min:
+                min = value
+            if value > max:
+                max = value
+    
+    return min, max
+
 def main_lstm():
     df = pd.read_csv('bitcoin_price_Training - Training.csv')
+    df = df.drop('Date', 1)
     data = df.to_numpy()
-    
-    #normalize data
 
+    #normalize data
+    x,y = data.shape
+
+    # normalized_data = np.zeros((x,y))
+    normalized_data = [[None for j in range(y)] for i in range(x)]
+    
+
+    for j in range(y):
+        xMin, xMax = getMinMaxVal(data, x, y)
+        for i in range(x):
+            if data[i][j] == '-':
+                print('masok')
+                normalized_data[i][j] = data[i][j]
+            else:    
+                normalized_data[i][j] = minMaxScaler(data[i][j], xMin, xMax)
+            
+            
+    print(np.array(normalized_data))
+            
 
 def test_backprop_dense():
 

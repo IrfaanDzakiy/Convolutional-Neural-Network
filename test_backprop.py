@@ -7,7 +7,7 @@ from constant import *
 from utils import *
 
 if __name__ == '__main__':
-    n_data = 500
+    n_data = 10000
 
     # x_train = extract_mnist_images("train-images.idx3-ubyte", n_data)
     # x_train = convert_to_grayscale(x_train) / 255

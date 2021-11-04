@@ -27,7 +27,7 @@ class ConvolutionLayer:
             poolingFilterSize, poolingMode, poolingPadding, poolingStride)
         self.output_shape = None
         self.params = None
-        self.output: 'np.ndarray' = None
+        self.output = None
 
     def set_output_shape(self, output_shape):
         self.output_shape = output_shape
@@ -51,6 +51,7 @@ class ConvolutionLayer:
             "output_shape": self.getOutputShape(),
             "params": self.getParamCount()
         }
+        print(data)
         return data
 
     def set_kernel(self, kernel):
@@ -247,7 +248,7 @@ class PoolingStage:
         for channel_idx in range(len(inputs)):
             featureMaps.append(self.pooling(inputs[channel_idx]))
 
-        return np.array(featureMaps)
+        return featureMaps
 
     def backprop(self, dL_dOut: 'np.ndarray'):
         (n_output, size_output, _) = self.getOutputShape()
@@ -352,7 +353,6 @@ class ConvolutionalStage:
         for iInput in range(self.nInput):
             input = inputs[iInput]
             inputFilter = filter[iInput]
-
             for i in range(0, featureMapSize, self.strideSize):
                 for j in range(0, featureMapSize, self.strideSize):
                     inputSubset = input[i:i +

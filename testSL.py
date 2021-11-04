@@ -24,7 +24,7 @@ def test():
     inputs = extract_mnist_images("train-images.idx3-ubyte", 2)
     inputs = convert_grayscale_to_rgb(inputs) / 255
 
-    convoLayer = ConvolutionLayer((3, 2), RELU, MAX, 2, 0.01)
+    convoLayer = ConvolutionLayer((3, 2), RELU, MAX, 2, 2)
     denseLayer = DenseLayer(10, SOFTMAX)
 
     model = Sequential()

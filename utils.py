@@ -115,7 +115,13 @@ def cross_validation(k, dataset, seed=1, random=1):
 
 def accuracy(test_values, predictions):
     N = test_values.shape[0]
-    accuracy = (test_values == predictions).sum() / N
+    sum = 0
+    for i in range(len(test_values)):
+        if test_values[i] == np.argmax(predictions[i]):
+            sum += 1
+            
+    accuracy = sum / N
+    # accuracy = (test_values == predictions).sum() / N
     return accuracy
 
 
