@@ -5,6 +5,7 @@ from sequential import *
 from lstm import *
 from PIL import Image
 import numpy as np
+import pandas as pd
 
 mat_example = [
     [4, 3, 8, 5],
@@ -37,6 +38,12 @@ def main():
         print(o)
 
     model.print_summary()
+
+def main_lstm():
+    df = pd.read_csv('bitcoin_price_Training - Training.csv')
+    data = df.to_numpy()
+    
+    #normalize data
 
 
 def test_backprop_dense():
@@ -91,5 +98,6 @@ if __name__ == '__main__':
     # test_backprop_dense()
     # csv_convert()
 
-    lstm_test()
+    # lstm_test()
+    main_lstm()
     # lstm_seq_test()
