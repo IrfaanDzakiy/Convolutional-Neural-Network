@@ -83,7 +83,24 @@ def getMinMaxVal(array, row, col):
 
 def main_lstm():
     df = pd.read_csv('bitcoin_price_Training - Training.csv')
-    df = df.drop('Date', 1)
+
+    data = df.drop(columns=["Date"])
+    # data = data.drop(columns=["Volume", "Market Cap"])
+    
+    # data['Volume'] = data['Volume'].str.replace(',', '')
+    # data['Market Cap'] = data['Market Cap'].str.replace(',', '')
+  
+    # data['Volume'] = pd.to_numeric(data['Volume'], errors='coerce')
+    # data['Market Cap'] = pd.to_numeric(data['Market Cap'], errors='coerce')
+        
+    data["Open"] = data["Open"].astype(int)
+    data["High"] = data["High"].astype(int)
+    data["Low"] = data["Low"].astype(int)
+    data["Close"] = data["Close"].astype(int)
+    data = data.to_numpy()
+    print(data.shape)
+    print(data)
+    
     data = df.to_numpy()
 
     # normalize data
@@ -102,6 +119,10 @@ def main_lstm():
                 normalized_data[i][j] = minMaxScaler(data[i][j], xMin, xMax)
 
     print(np.array(normalized_data))
+
+    
+    lstm = LSTMLayer(1)
+    lstm.calculate(data)
 
 
 def test_backprop_dense():
@@ -129,8 +150,8 @@ def csv_convert():
 
 
 def lstm_test():
-    inputs = np.array([[1, 2], [0.5, 3]])
-
+    inputs = np.array([[1, 2, 3, 4, 5, 6], [0.5, 3, 3, 4, 5, 6]])
+    print(inputs.shape)
     lstm = LSTMLayer(1)
     lstm.calculate(inputs)
 
