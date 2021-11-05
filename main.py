@@ -46,13 +46,13 @@ def main_lstm():
 
     data = df.drop(columns=["Date"])
     # data = data.drop(columns=["Volume", "Market Cap"])
-    
+
     # data['Volume'] = data['Volume'].str.replace(',', '')
     # data['Market Cap'] = data['Market Cap'].str.replace(',', '')
-  
+
     # data['Volume'] = pd.to_numeric(data['Volume'], errors='coerce')
     # data['Market Cap'] = pd.to_numeric(data['Market Cap'], errors='coerce')
-        
+
     data["Open"] = data["Open"].astype(float)
     data["High"] = data["High"].astype(float)
     data["Low"] = data["Low"].astype(float)
@@ -60,13 +60,13 @@ def main_lstm():
     data = data.to_numpy()
     print(data.shape)
     print(data)
-    
+
     # normalize data
     x, y = data.shape
 
     # normalized_data = np.zeros((x,y))
     normalized_data = [[None for j in range(y)] for i in range(x)]
-    
+
     for j in range(y):
         xMin = None
         xMax = None
@@ -75,7 +75,7 @@ def main_lstm():
                 xMin, xMax = getMinMaxVal(data, x, j)
                 print('xMin = ', xMin)
                 print('xMax = ', xMax)
-                
+
             if data[i][j] == '-':
                 normalized_data[i][j] = minMaxScaler(xMin, xMin, xMax)
             else:
@@ -83,7 +83,7 @@ def main_lstm():
 
     # print(np.array(normalized_data))
     return np.asarray(normalized_data, dtype='float64')
-    
+
     # lstm = LSTMLayer(1)
     # lstm.calculate(np.asarray(normalized_data, dtype='float64'))
 
@@ -120,18 +120,16 @@ def lstm_test():
 
 
 def lstm_seq_test():
-    # inputs = np.array([[1], [0.5]])
-    inputs = main_lstm()
+    inputs = np.array([[1, 0.4, 0.3], [0.5, 0.2, 0.1]])
+    # inputs = main_lstm()
     print(inputs)
     model = Sequential()
 
-    # dense_output = DenseLayer(5, SOFTMAX)
-    lstm = LSTMLayer(10)
-    lstm2 = LSTMLayer(15)
+    dense_output = DenseLayer(3, RELU)
+    lstm = LSTMLayer(5)
 
     model.add_layer(lstm)
-    # model.add_layer(lstm2)
-    # model.add_layer(dense_output)
+    model.add_layer(dense_output)
 
     output = model.forward_prop(inputs)
     model.print_summary()
