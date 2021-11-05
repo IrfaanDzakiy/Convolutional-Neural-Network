@@ -203,6 +203,9 @@ def mmult(A, B):
     return res_in_np_array
 
 
+def reverseMinMaxScaler(x, xMin, xMax):
+    
+    return (xMax-xMin) * x + xMin
 
 def minMaxScaler(x, xMin, xMax):
 

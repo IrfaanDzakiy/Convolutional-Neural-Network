@@ -14,6 +14,9 @@ mat_example = [
     [2, 5, 2, 5]
 ]
 
+# store min max val per col
+minMax = []
+    
 inputs = np.random.randint(
     256, size=(1, 32, 32))
 
@@ -69,13 +72,15 @@ def main_lstm():
 
     # normalized_data = np.zeros((x,y))
     normalized_data = [[None for j in range(y)] for i in range(x)]
-
+    
     for j in range(y):
         xMin = None
         xMax = None
         for i in range(x):
             if xMin == None and xMax == None:
                 xMin, xMax = getMinMaxVal(data, x, j)
+                minMax.append([xMin, xMax])
+                # print('minMax', minMax)
                 print('xMin = ', xMin)
                 print('xMax = ', xMax)
 
@@ -87,8 +92,6 @@ def main_lstm():
     # print(np.array(normalized_data))
     return np.asarray(normalized_data, dtype='float64')
 
-    # lstm = LSTMLayer(1)
-    # lstm.calculate(np.asarray(normalized_data, dtype='float64'))
 
 
 def test_backprop_dense():
@@ -124,8 +127,8 @@ def lstm_test():
 
 def lstm_seq_test():
     inputs = np.array([[1, 0.4, 0.3], [0.5, 0.2, 0.1]])
-    # inputs = main_lstm()
-    print(inputs)
+    inputs = main_lstm()
+    # print(inputs)
     model = Sequential()
 
     dense_output = DenseLayer(3, RELU)
@@ -136,8 +139,17 @@ def lstm_seq_test():
 
     output = model.forward_prop(inputs)
     model.print_summary()
+    
+    denorm_output = []
+    
+    print(minMax)
+    for i in range(len(output)):
+        denorm_output.append(reverseMinMaxScaler(output[i], minMax[i][0], minMax[i][1]))
 
-    print(f"Model Output : \n {output}")
+    print(f"Model Output : \n {denorm_output}")
+    
+    
+    
 
 
 if __name__ == '__main__':
@@ -146,5 +158,5 @@ if __name__ == '__main__':
     # csv_convert()
 
     # lstm_test()
-    main_lstm()
-    # lstm_seq_test()
+    # main_lstm()
+    lstm_seq_test()
