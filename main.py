@@ -44,14 +44,17 @@ def main_lstm():
     # df = pd.read_csv('bitcoin_price_1week_Test - Test.csv')
     df = pd.read_csv('bitcoin_price_Training - Training.csv')
 
+    
     data = df.drop(columns=["Date"])
+    data = data.head(32)
+    data = data.iloc[::-1]
     # data = data.drop(columns=["Volume", "Market Cap"])
     
-    # data['Volume'] = data['Volume'].str.replace(',', '')
-    # data['Market Cap'] = data['Market Cap'].str.replace(',', '')
+    data['Volume'] = data['Volume'].str.replace(',', '')
+    data['Market Cap'] = data['Market Cap'].str.replace(',', '')
   
-    # data['Volume'] = pd.to_numeric(data['Volume'], errors='coerce')
-    # data['Market Cap'] = pd.to_numeric(data['Market Cap'], errors='coerce')
+    data['Volume'] = pd.to_numeric(data['Volume'], errors='coerce')
+    data['Market Cap'] = pd.to_numeric(data['Market Cap'], errors='coerce')
         
     data["Open"] = data["Open"].astype(float)
     data["High"] = data["High"].astype(float)
@@ -113,7 +116,7 @@ def csv_convert():
 
 
 def lstm_test():
-    inputs = np.array([[1, 2, 3, 4, 5, 6], [0.5, 3, 3, 4, 5, 6]])
+    inputs = np.array([[1, 2, 3, 4, 5, 6], [0.5, 3, 3, 4, 5, 6], [0.5, 3, 3, 4, 5, 6]])
     print(inputs.shape)
     lstm = LSTMLayer(1)
     lstm.calculate(inputs)
@@ -145,5 +148,5 @@ if __name__ == '__main__':
     # csv_convert()
 
     # lstm_test()
-    # main_lstm()
-    lstm_seq_test()
+    main_lstm()
+    # lstm_seq_test()
