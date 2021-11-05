@@ -201,3 +201,48 @@ def mmult(A, B):
 
     res_in_np_array = np.array(result)
     return res_in_np_array
+
+
+
+def minMaxScaler(x, xMin, xMax):
+
+    xVal = None
+
+    if isinstance(x, str):
+        xVal = float(x.replace(',', ''))
+    else:
+        xVal = x
+
+    return (xVal - xMin) / (xMax - xMin)
+
+
+def getMinMaxVal(array, rowLength, currCol):
+    min = float('inf')
+    max = float('-inf')
+
+    value = None
+
+    if isinstance(array[0][currCol], str):
+        # new_array = []
+        for i in range(rowLength):
+            if array[i][currCol] == '-':
+                continue
+            value = float((array[i][currCol]).replace(',', ''))
+
+            if value < min:
+                min = value
+            if value > max:
+                max = value
+
+    else:
+        for i in range(rowLength):
+
+            value = array[i][currCol]
+
+            if value < min:
+                min = value
+            if value > max:
+                max = value
+
+    return min, max
+
