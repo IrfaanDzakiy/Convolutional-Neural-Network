@@ -51,9 +51,9 @@ class LSTMLayer:
 
     def getOutputShape(self):
         if (self.return_sequence):
-            return (self.num_units, len(self.input))
+            return (self.num_units, self.num_units)
         else:
-            return (1, len(self.input))
+            return (1, self.num_units)
 
     def getParamCount(self):
         n = self.num_units
