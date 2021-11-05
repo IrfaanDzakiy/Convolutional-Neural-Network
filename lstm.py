@@ -139,7 +139,7 @@ class LSTMLayer:
             Xt = np.array(curr_input).reshape(len(curr_input), 1)
             self.set_input(Xt)
 
-            print(Xt.shape)
+            # print(Xt.shape)
 
             # TODO : Calculate Forget Gate
             UfXt = mmult(self.u_f, Xt)

@@ -52,16 +52,18 @@ def minMaxScaler(x, xMin, xMax):
     return (xVal - xMin) / (xMax - xMin)
 
 
-def getMinMaxVal(array, row, col):
+def getMinMaxVal(array, rowLength, currCol):
     min = float('inf')
     max = float('-inf')
 
     value = None
 
-    if isinstance(array[0][col-1], str):
+    if isinstance(array[0][currCol], str):
         # new_array = []
-        for i in range(row):
-            value = float((array[i][col-1]).replace(',', ''))
+        for i in range(rowLength):
+            if array[i][currCol] == '-':
+                continue
+            value = float((array[i][currCol]).replace(',', ''))
 
             if value < min:
                 min = value
@@ -69,9 +71,9 @@ def getMinMaxVal(array, row, col):
                 max = value
 
     else:
-        for i in range(row):
+        for i in range(rowLength):
 
-            value = array[row][col-1]
+            value = array[i][currCol]
 
             if value < min:
                 min = value
@@ -93,32 +95,36 @@ def main_lstm():
     # data['Volume'] = pd.to_numeric(data['Volume'], errors='coerce')
     # data['Market Cap'] = pd.to_numeric(data['Market Cap'], errors='coerce')
         
-    data["Open"] = data["Open"].astype(int)
-    data["High"] = data["High"].astype(int)
-    data["Low"] = data["Low"].astype(int)
-    data["Close"] = data["Close"].astype(int)
+    data["Open"] = data["Open"].astype(float)
+    data["High"] = data["High"].astype(float)
+    data["Low"] = data["Low"].astype(float)
+    data["Close"] = data["Close"].astype(float)
     data = data.to_numpy()
     print(data.shape)
     print(data)
     
-    data = df.to_numpy()
-
     # normalize data
     x, y = data.shape
 
     # normalized_data = np.zeros((x,y))
     normalized_data = [[None for j in range(y)] for i in range(x)]
-
+    
     for j in range(y):
-        xMin, xMax = getMinMaxVal(data, x, y)
+        xMin = None
+        xMax = None
         for i in range(x):
+            if xMin == None and xMax == None:
+                xMin, xMax = getMinMaxVal(data, x, j)
+                print('xMin = ', xMin)
+                print('xMax = ', xMax)
+                
             if data[i][j] == '-':
-                print('masok')
-                normalized_data[i][j] = data[i][j]
+                normalized_data[i][j] = None
             else:
                 normalized_data[i][j] = minMaxScaler(data[i][j], xMin, xMax)
 
-    print(np.array(normalized_data))
+    # print(np.array(normalized_data))
+    return np.asarray(normalized_data, dtype='float64')
 
     
     lstm = LSTMLayer(1)
@@ -157,8 +163,9 @@ def lstm_test():
 
 
 def lstm_seq_test():
-    inputs = np.array([[1], [0.5]])
-
+    # inputs = np.array([[1], [0.5]])
+    inputs = main_lstm()
+    print(inputs)
     model = Sequential()
 
     # dense_output = DenseLayer(5, SOFTMAX)
